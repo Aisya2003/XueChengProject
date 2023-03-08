@@ -1,0 +1,33 @@
+###查询课程
+POST http://{{content_host}}/content/course/list?pageNo=1&pageSize=10
+Content-Type: application/json
+
+{
+"auditStatus":"",
+"courseName":"",
+"publishStatus":""
+}
+###添加课程
+
+POST {{content_host}}/content/course
+Content-Type: application/json
+
+{
+
+  "mt": "1-1-1",
+  "st": "HTML",
+  "name": "测试课程222",
+  "pic": "标签",
+  "teachmode": "200002",
+  "users": "初级人员",
+  "tags": "",
+  "grade": "204001",
+  "description": "课程介绍",
+  "charge": "201001",
+  "price": 10,
+  "originalPrice":100,
+  "qq": "123231",
+  "wechat": "123123",
+  "phone": "12312345678",
+  "validDays": 365
+}
