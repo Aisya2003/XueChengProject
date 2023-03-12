@@ -1,12 +1,23 @@
-server:
-  servlet:
-    context-path: /system
-  port: 63110
+nacosAddr: 127.0.0.1:8848
+nacosGroup: xuecheng-plus-project
+nacosNameSpace: 1a69680d-6377-4849-bf44-b9e803de94cc
 #微服务配置
 spring:
   application:
     name: system-service
-
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${nacosAddr} #nacos地址
+        namespace: ${nacosNameSpace} #开发环境命名空间
+        group: ${nacosGroup} #组名
+      config:
+        namespace: ${nacosNameSpace}
+        group: ${nacosGroup}
+        file-extension: yaml
+        refresh-enabled: true
+  profiles:
+    active: dev
 # 日志文件配置路径
 logging:
   config: classpath:log4j2-dev.xml

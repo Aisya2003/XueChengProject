@@ -3,20 +3,20 @@ POST http://{{content_host}}/content/course/list?pageNo=1&pageSize=10
 Content-Type: application/json
 
 {
-"auditStatus":"",
-"courseName":"",
-"publishStatus":""
+  "auditStatus": "",
+  "courseName": "",
+  "publishStatus": ""
 }
+
 ###添加课程
 
 POST {{content_host}}/content/course
 Content-Type: application/json
 
 {
-
   "mt": "1-1-1",
   "st": "HTML",
-  "name": "测试课程222",
+  "name": "测试课程333",
   "pic": "标签",
   "teachmode": "200002",
   "users": "初级人员",
@@ -25,9 +25,150 @@ Content-Type: application/json
   "description": "课程介绍",
   "charge": "201001",
   "price": 10,
-  "originalPrice":100,
+  "originalPrice": 100,
   "qq": "123231",
   "wechat": "123123",
   "phone": "12312345678",
   "validDays": 365
 }
+###
+Content-Type: application/json
+
+[
+  {
+    "id": 237,
+    "pname": "第1章",
+    "parentid": 0,
+    "grade": 1,
+    "mediaType": "",
+    "startTime": null,
+    "endTime": null,
+    "description": null,
+    "timelength": null,
+    "orderby": 1,
+    "courseId": 22,
+    "coursePubId": null,
+    "status": null,
+    "isPreview": null,
+    "createDate": null,
+    "changeDate": null,
+    "teachplanMedia": null,
+    "teachPlanTreeNodes": [
+      {
+        "id": 240,
+        "pname": "第1节",
+        "parentid": 237,
+        "grade": 2,
+        "mediaType": "",
+        "startTime": null,
+        "endTime": null,
+        "description": null,
+        "timelength": null,
+        "orderby": 1,
+        "courseId": 22,
+        "coursePubId": null,
+        "status": null,
+        "isPreview": null,
+        "createDate": null,
+        "changeDate": null,
+        "teachplanMedia": null,
+        "teachPlanTreeNodes": null
+      },
+      {
+        "id": 241,
+        "pname": "第2节",
+        "parentid": 237,
+        "grade": 2,
+        "mediaType": "",
+        "startTime": null,
+        "endTime": null,
+        "description": null,
+        "timelength": null,
+        "orderby": 2,
+        "courseId": 22,
+        "coursePubId": null,
+        "status": null,
+        "isPreview": null,
+        "createDate": null,
+        "changeDate": null,
+        "teachplanMedia": null,
+        "teachPlanTreeNodes": null
+      },
+      {
+        "id": 253,
+        "pname": "第1节修改名称",
+        "parentid": 237,
+        "grade": 2,
+        "mediaType": "",
+        "startTime": null,
+        "endTime": null,
+        "description": null,
+        "timelength": null,
+        "orderby": 3,
+        "courseId": 22,
+        "coursePubId": null,
+        "status": null,
+        "isPreview": null,
+        "createDate": null,
+        "changeDate": null,
+        "teachplanMedia": null,
+        "teachPlanTreeNodes": null
+      }
+    ]
+  },
+  {
+    "id": 259,
+    "pname": "新章名称 [点击修改]",
+    "parentid": 0,
+    "grade": 1,
+    "mediaType": null,
+    "startTime": null,
+    "endTime": null,
+    "description": null,
+    "timelength": null,
+    "orderby": 2,
+    "courseId": 22,
+    "coursePubId": null,
+    "status": null,
+    "isPreview": null,
+    "createDate": null,
+    "changeDate": null,
+    "teachplanMedia": null,
+    "teachPlanTreeNodes": [
+      {
+        "id": 260,
+        "pname": "新小节名称 [点击修改]",
+        "parentid": 259,
+        "grade": 2,
+        "mediaType": null,
+        "startTime": null,
+        "endTime": null,
+        "description": null,
+        "timelength": null,
+        "orderby": 1,
+        "courseId": 22,
+        "coursePubId": null,
+        "status": null,
+        "isPreview": null,
+        "createDate": null,
+        "changeDate": null,
+        "teachplanMedia": null,
+        "teachPlanTreeNodes": null
+      }
+    ]
+  }
+]
+
+###教学计划
+GET http://{{gateway_host}}/content/teachplan/117/tree-nodes
+
+
+###上传媒资文件
+POST {{media_host}}/media/upload/coursefile
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="filedata"; filename="2.bmp"
+Content-Type: application/octet-stream
+
+< E:\JavaProject\XueChengProject\upload\2.bmp

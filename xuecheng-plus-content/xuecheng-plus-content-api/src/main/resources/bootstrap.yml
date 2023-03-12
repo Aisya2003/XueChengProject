@@ -1,12 +1,24 @@
-server:
-  servlet:
-    #为页面访问添加统一前缀
-    context-path: /content
-  port: 63040
+nacosAddr: 127.0.0.1:8848
+nacosNameSpace: 1a69680d-6377-4849-bf44-b9e803de94cc
+nacosGroup: xuecheng-plus-project
 #微服务配置
 spring:
   application:
     name: content-api
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${nacosAddr} #nacos地址
+        namespace: ${nacosNameSpace} #开发环境命名空间
+        group: ${nacosGroup} #组名
+      config:
+        namespace: ${nacosNameSpace}
+        group: ${nacosGroup}
+        file-extension: yaml
+        refresh-enabled: true
+  #设置开发环境来匹配nacos配置中
+  profiles:
+    active: dev
 # 日志文件配置路径
 logging:
   config: classpath:log4j2-dev.xml

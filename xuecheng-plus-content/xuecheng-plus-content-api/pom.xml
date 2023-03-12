@@ -10,6 +10,18 @@
     <artifactId>xuecheng-plus-content-api</artifactId>
 
     <dependencies>
+        <!--添加nacos-discovery配置-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <!--添加nacos-config配置-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+
         <!--依赖model-->
         <dependency>
             <groupId>com.example</groupId>

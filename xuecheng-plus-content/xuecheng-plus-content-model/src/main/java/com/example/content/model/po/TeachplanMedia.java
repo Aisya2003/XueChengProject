@@ -2,6 +2,7 @@ package com.example.content.model.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import org.springframework.context.annotation.Bean;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -13,8 +14,8 @@ import java.time.LocalDateTime;
  *
  * @author itcast
  */
-@Data
 @TableName("teachplan_media")
+@Data
 public class TeachplanMedia implements Serializable {
 
     private static final long serialVersionUID = 1L;

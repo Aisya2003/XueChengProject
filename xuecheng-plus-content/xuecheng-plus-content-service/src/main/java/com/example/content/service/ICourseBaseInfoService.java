@@ -3,6 +3,7 @@ package com.example.content.service;
 import com.example.base.model.*;
 import com.example.content.model.dto.AddCourseDto;
 import com.example.content.model.dto.CourseBaseInfoDto;
+import com.example.content.model.dto.EditCourseDto;
 import com.example.content.model.dto.QueryCourseParamsDto;
 import com.example.content.model.po.CourseBase;
 
@@ -27,4 +28,19 @@ public interface ICourseBaseInfoService {
      * @return 课程包括基本信息，营销信息
      */
     CourseBaseInfoDto createCourseBase(Long companyId,AddCourseDto dto);
+
+    /**
+     * 根据课程id查询CourseBaseInfoDto
+     * @param courseId 课程id
+     * @return CourseBaseInfoDto
+     */
+    CourseBaseInfoDto getCourseBaseInfoDto(Long courseId);
+
+    /**
+     * 修改课程信息
+     * @param companyId 只有具有相同的机构id才能修改课程
+     * @param dto 课程修改信息dto
+     * @return CourseBaseInfoDto
+     */
+    CourseBaseInfoDto updateCourseBaseInfo(Long companyId, EditCourseDto dto);
 }

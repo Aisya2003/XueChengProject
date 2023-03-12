@@ -15,6 +15,14 @@
     </properties>
 
     <dependencies>
+        <!--根据文件后缀名获得ContentType-->
+        <dependency>
+            <groupId>com.j256.simplemagic</groupId>
+            <artifactId>simplemagic</artifactId>
+            <version>1.17</version>
+        </dependency>
+
+
         <!--SpringBoot依赖-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -15,6 +15,14 @@
 
 
     <dependencies>
+        <!--获取base依赖-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>xuecheng-plus-base</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+
         <!--mysql连接-->
         <dependency>
             <groupId>mysql</groupId>
