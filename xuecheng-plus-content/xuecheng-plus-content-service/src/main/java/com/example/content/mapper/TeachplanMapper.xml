@@ -87,12 +87,11 @@
                m.id              teachplanMeidaId,
                m.media_id        mediaId
         FROM teachplan one
-                 INNER JOIN teachplan two ON two.parentid = one.id
+                 LEFT JOIN teachplan two ON two.parentid = one.id
                  LEFT JOIN teachplan_media m ON m.teachplan_id = two.id
-        WHERE one.course_id = #{courseId}
+        WHERE one.course_id = #{courseId} AND one.parentid = 0
         ORDER BY
             one.orderby,
             two.orderby
     </select>
-
 </mapper>

@@ -57,6 +57,12 @@ public class MediaProcess implements Serializable {
      * 媒资文件访问地址
      */
     private String url;
-
-
+    /**
+     * 媒资文件nacos路径
+     */
+    private String filePath;
+    /**
+     * 错误信息
+     */
+    private String errormsg;
 }

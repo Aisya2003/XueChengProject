@@ -16,6 +16,10 @@ spring:
         group: ${nacosGroup}
         file-extension: yaml
         refresh-enabled: true
+        shared-configs:
+          - data-id: freemarker-config-${spring.profiles.active}.yaml
+            group: xuecheng-plus-common
+            refresh: true
   #设置开发环境来匹配nacos配置中
   profiles:
     active: dev

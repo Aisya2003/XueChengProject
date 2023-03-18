@@ -3,6 +3,7 @@ package com.example.media.api;
 import com.example.base.exception.XuechengPlusException;
 import com.example.base.model.PageParams;
 import com.example.base.model.PageResult;
+import com.example.base.model.RestResponse;
 import com.example.media.model.dto.UploadFileParamsDto;
 import com.example.media.model.dto.UploadMediaFilesDto;
 import com.example.media.model.dto.QueryMediaParamsDto;
@@ -36,6 +37,8 @@ public class MediaFilesController {
     @PostMapping("/files")
     public PageResult<MediaFiles> list(PageParams pageParams, @RequestBody QueryMediaParamsDto queryMediaParamsDto) {
         Long companyId = 22L;
+        if (pageParams.getPageNo() == null) pageParams.setPageNo(1L);
+        if (pageParams.getPageSize() == null) pageParams.setPageSize(10L);
         return mediaFileService.queryMediaFiles(companyId, pageParams, queryMediaParamsDto);
 
     }
@@ -76,6 +79,18 @@ public class MediaFilesController {
             throw new XuechengPlusException("上传过程失败！");
         }
         return uploadMediaFilesDto;
+    }
+
+    /**
+     *根据文件id获取文件在线查看的Url
+     * @param mediaId 文件的Id
+     * @return 查看地址
+     */
+    @ApiOperation("预览文件")
+    @GetMapping("/preview/{mediaId}")
+    public RestResponse<String> getUrlByMediaId(@PathVariable("mediaId")String mediaId){
+
+        return mediaFileService.getFileUrlById(mediaId);
     }
 
 }

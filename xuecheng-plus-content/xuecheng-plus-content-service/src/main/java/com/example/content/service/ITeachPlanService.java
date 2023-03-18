@@ -1,7 +1,9 @@
 package com.example.content.service;
 
+import com.example.content.model.dto.BindTeachPlanMediaDto;
 import com.example.content.model.dto.SaveTeachplanDto;
 import com.example.content.model.dto.TeachPlanDto;
+import com.example.content.model.po.TeachplanMedia;
 
 import java.util.List;
 
@@ -18,4 +20,12 @@ public interface ITeachPlanService {
      * @param dto 课程大纲添加dto
      */
     void saveTeachPlan(SaveTeachplanDto dto);
+
+
+    /**
+     * 教学计划和媒资绑定
+     * @param dto 请求参数
+     * @return 教学计划媒资关系表
+     */
+    TeachplanMedia bindMedia(BindTeachPlanMediaDto dto);
 }

@@ -15,5 +15,7 @@ import java.util.List;
  */
 public interface TeachplanMapper extends BaseMapper<Teachplan> {
     //查询课程计划（树形）
-    public List<TeachPlanDto> selectTreeNodes(Long courseId);
+    List<TeachPlanDto> selectTreeNodes(Long courseId);
+
+
 }

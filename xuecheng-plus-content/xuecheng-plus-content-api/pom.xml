@@ -10,6 +10,11 @@
     <artifactId>xuecheng-plus-content-api</artifactId>
 
     <dependencies>
+        <!--FreeMarker模板引擎-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-freemarker</artifactId>
+        </dependency>
         <!--添加nacos-discovery配置-->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
