@@ -20,6 +20,9 @@ spring:
           - data-id: freemarker-config-${spring.profiles.active}.yaml
             group: xuecheng-plus-common
             refresh: true
+          - data-id: content-service-${spring.profiles.active}.yaml
+            group: xuecheng-plus-project
+            refresh: true
   #设置开发环境来匹配nacos配置中
   profiles:
     active: dev

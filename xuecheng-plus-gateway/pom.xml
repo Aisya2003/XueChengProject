@@ -9,6 +9,28 @@
     </parent>
     <artifactId>xuecheng-plus-gateway</artifactId>
     <dependencies>
+        <!--base-->
+        <dependency>
+            <groupId>com.example</groupId>
+            <artifactId>xuecheng-plus-base</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <!--security-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-security</artifactId>
+        </dependency>
+        <!--Oauth2-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-oauth2</artifactId>
+        </dependency>
+        <!--fastJson-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+
         <!--网关-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

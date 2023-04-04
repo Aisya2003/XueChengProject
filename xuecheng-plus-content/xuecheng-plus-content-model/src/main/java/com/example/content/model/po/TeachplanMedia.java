@@ -8,11 +8,8 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * <p>
- * 
- * </p>
  *
- * @author itcast
+ *
  */
 @TableName("teachplan_media")
 @Data

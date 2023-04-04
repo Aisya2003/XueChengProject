@@ -1,0 +1,5 @@
+### 生成
+POST {{checkcode_host}}/checkcode/pic
+
+### 验证
+POST {{checkcode_host}}/checkcode/verify?key=11e0844c-2e88-4cf9-903a-7bf34a2418e2&code=3Y1K

@@ -2,6 +2,7 @@ package com.example.media.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.base.constant.Dictionary;
 import com.example.base.exception.XuechengPlusException;
 import com.example.base.model.PageParams;
 import com.example.base.model.PageResult;
@@ -17,11 +18,8 @@ import com.example.media.model.po.MediaFiles;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import io.minio.*;
-import io.minio.errors.*;
-import io.minio.messages.Upload;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,24 +31,15 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
-/**
- * @author Mr.M
- * @version 1.0
- * @description TODO
- * @date 2022/9/10 8:58
- */
 @Service
 public class MediaFileServiceImpl implements IMediaFileService {
-    private MediaFilesMapper mediaFilesMapper;
-    private MinioClient minioClient;
-    private IMediaFileService currentProxy;
+    private final MediaFilesMapper mediaFilesMapper;
+    private final MinioClient minioClient;
+    private final IMediaFileService currentProxy;
 
     //获取普通文件桶的信息
     @Value("${minio.bucket.files}")
@@ -167,7 +156,7 @@ public class MediaFileServiceImpl implements IMediaFileService {
             }
             mediaFiles.setCreateDate(LocalDateTime.now());
             mediaFiles.setStatus("1");
-            mediaFiles.setAuditStatus("002003");
+            mediaFiles.setAuditStatus(Dictionary.AUDIT_COURSE_COMMIT.getCode());
             //插入
             try {
                 mediaFilesMapper.insert(mediaFiles);
@@ -462,7 +451,7 @@ public class MediaFileServiceImpl implements IMediaFileService {
         }
         return buffer.toString();
     }
-    
+
     @Override
     public void addMediaFileToMinio(String path, String bucketName, String objectName) {
         try {

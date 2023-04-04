@@ -3,13 +3,6 @@ package com.example.base.model;
 import lombok.Data;
 import lombok.ToString;
 
-/**
- * @description 通用结果类型
- * @author Mr.M
- * @date 2022/9/13 14:44
- * @version 1.0
- */
-
  @Data
  @ToString
 public class RestResponse<T> {

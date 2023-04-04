@@ -18,7 +18,7 @@ import java.util.Map;
 @Service
 @Slf4j
 public class CourseCategoryServiceImpl implements ICourseCategoryService {
-    private CourseCategoryMapper mapper;
+    private final CourseCategoryMapper mapper;
 
     @Autowired
     public CourseCategoryServiceImpl(CourseCategoryMapper mapper) {
@@ -33,14 +33,14 @@ public class CourseCategoryServiceImpl implements ICourseCategoryService {
         //定义一个list作为最终返回数据
         List<CourseCategoryDto> courseCategoryDtoList = new ArrayList<>();
         //定义一个map用来方便寻找父节点，每一个父节点只存在一个在map中
-        Map<String,CourseCategoryDto> parentNodes = new HashMap<>();
+        Map<String, CourseCategoryDto> parentNodes = new HashMap<>();
         //遍历每一个节点
         courseCategoryDtos.stream().forEach(
-                item ->{
-                    parentNodes.put(item.getId(),item);
+                item -> {
+                    parentNodes.put(item.getId(), item);
                     //如果传入的id与子节点的parentid相同，则说明这个子节点是直接下属
                     //添加到返回列表中
-                    if (id.equals(item.getParentid())){
+                    if (id.equals(item.getParentid())) {
                         courseCategoryDtoList.add(item);
                     }
 
@@ -48,7 +48,7 @@ public class CourseCategoryServiceImpl implements ICourseCategoryService {
                     //根据父节点id找到父节点对象，父节点就是曾经存储在map中的item对象
                     CourseCategoryDto parentNode = parentNodes.get(item.getParentid());
                     //判断父节点是否为空
-                    if (parentNode != null){
+                    if (parentNode != null) {
                         //获取父节点的childrenTreeNodes
                         List<CourseCategoryDto> childrenTreeNodes = parentNode.getChildrenTreeNodes();
                         //判断childTreeNodes是否为第一次创建

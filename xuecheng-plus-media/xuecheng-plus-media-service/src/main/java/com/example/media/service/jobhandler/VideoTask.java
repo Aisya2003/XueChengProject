@@ -24,9 +24,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class VideoTask {
-    private MediaProcessMapper mediaProcessMapper;
-    private IMediaFileService mediaFileService;
-    private IMediaProcessService mediaProcessService;
+    private final MediaProcessMapper mediaProcessMapper;
+    private final IMediaFileService mediaFileService;
+    private final IMediaProcessService mediaProcessService;
 
     @Value("${videoprocess.ffmpegpath}")
     private String ffmpegPath;
@@ -132,7 +132,7 @@ public class VideoTask {
         try {
             countDownLatch.await(30, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
-            log.error("计数器结束失败:{}",e.getMessage());
+            log.error("计数器结束失败:{}", e.getMessage());
             throw new RuntimeException(e);
         }
 

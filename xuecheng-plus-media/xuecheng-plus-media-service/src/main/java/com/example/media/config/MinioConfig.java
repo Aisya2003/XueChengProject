@@ -15,12 +15,11 @@ public class MinioConfig {
     private String secretKey;
 
     @Bean
-    public MinioClient minioClient(){
-        MinioClient minioClient = MinioClient.builder()
+    public MinioClient minioClient() {
+        return MinioClient.builder()
                 .endpoint(endPoint)
-                .credentials(accessKey,secretKey)
+                .credentials(accessKey, secretKey)
                 .build();
-        return minioClient;
     }
 
 }

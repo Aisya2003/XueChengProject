@@ -19,8 +19,8 @@ import java.util.List;
 
 @Service
 public class TeachPlanServiceImp implements ITeachPlanService {
-    private TeachplanMapper teachplanMapper;
-    private TeachplanMediaMapper teachplanMediaMapper;
+    private final TeachplanMapper teachplanMapper;
+    private final TeachplanMediaMapper teachplanMediaMapper;
 
     @Autowired
     public TeachPlanServiceImp(TeachplanMapper teachplanMapper, TeachplanMediaMapper teachplanMediaMapper) {

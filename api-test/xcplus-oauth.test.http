@@ -1,0 +1,69 @@
+### 获取令牌
+GET {{auth_host}}/auth/oauth/authorize?client_id=XcWebApp&response_type=code&scope=all&redirect_uri=http://www.51xuecheng.cn
+
+### 获取令牌
+POST {{auth_host}}/auth/oauth/token?client_id=XcWebApp&client_secret=XcWebApp&grant_type=authorization_code&code=Otg13m&redirect_uri=http://www.51xuecheng.cn
+
+### 密码模式
+POST {{auth_host}}/auth/oauth/token?client_id=XcWebApp&client_secret=XcWebApp&grant_type=password&username=test&password=123
+
+
+### 携带token访问资源服务
+GET http://{{gateway_host}}/content/course/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsieHVlY2hlbmctcGx1cyJdLCJ1c2VyX25hbWUiOiJ6aGFuZ3NhbiIsInNjb3BlIjpbImFsbCJdLCJleHAiOjE2ODAwODU3MDAsImF1dGhvcml0aWVzIjpbInAxIl0sImp0aSI6IjMxNzZiMDM0LTljMGUtNDA3ZC05MzgzLWI5NjczNzk2YzViYiIsImNsaWVudF9pZCI6IlhjV2ViQXBwIn0.vhmR11TqVuFHqwOO7rVGuMqvIW9wfEhkbvL1P7IV5e4
+
+
+###password登录方式
+POST {{auth_host}}/auth/oauth/token?client_id=XcWebApp&client_secret=XcWebApp&grant_type=password&username={"authType":"password","username":"test","password":"123"}
+
+
+### asd
+GET {{checkcode_host}}
+Content-Type: application/json
+
+{
+  "login": "Aisya2003",
+  "id": 127002944,
+  "node_id": "U_kgDOB5HpQA",
+  "avatar_url": "https://avatars.githubusercontent.com/u/127002944?v=4",
+  "gravatar_id": "",
+  "url": "https://api.github.com/users/Aisya2003",
+  "html_url": "https://github.com/Aisya2003",
+  "followers_url": "https://api.github.com/users/Aisya2003/followers",
+  "following_url": "https://api.github.com/users/Aisya2003/following{/other_user}",
+  "gists_url": "https://api.github.com/users/Aisya2003/gists{/gist_id}",
+  "starred_url": "https://api.github.com/users/Aisya2003/starred{/owner}{/repo}",
+  "subscriptions_url": "https://api.github.com/users/Aisya2003/subscriptions",
+  "organizations_url": "https://api.github.com/users/Aisya2003/orgs",
+  "repos_url": "https://api.github.com/users/Aisya2003/repos",
+  "events_url": "https://api.github.com/users/Aisya2003/events{/privacy}",
+  "received_events_url": "https://api.github.com/users/Aisya2003/received_events",
+  "type": "User",
+  "site_admin": false,
+  "name": null,
+  "company": null,
+  "blog": "",
+  "location": null,
+  "email": null,
+  "hireable": null,
+  "bio": null,
+  "twitter_username": null,
+  "public_repos": 1,
+  "public_gists": 0,
+  "followers": 0,
+  "following": 0,
+  "created_at": "2023-03-05T04:13:06Z",
+  "updated_at": "2023-03-05T05:04:34Z",
+  "private_gists": 0,
+  "total_private_repos": 0,
+  "owned_private_repos": 0,
+  "disk_usage": 125,
+  "collaborators": 0,
+  "two_factor_authentication": false,
+  "plan": {
+    "name": "free",
+    "space": 976562499,
+    "collaborators": 0,
+    "private_repos": 10000
+  }
+}

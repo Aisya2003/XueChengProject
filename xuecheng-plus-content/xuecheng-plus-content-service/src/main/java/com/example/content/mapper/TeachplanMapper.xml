@@ -40,7 +40,7 @@
         <result column="one_courseId" property="courseId"/>
         <result column="one_coursePubId" property="coursePubId"/>
         <!--一对多映射（List）-->
-        <collection property="teachPlanTreeNodes" ofType="com.example.content.model.dto.TeachPlanDto" >
+        <collection property="teachPlanTreeNodes" ofType="com.example.content.model.dto.TeachPlanDto">
 
             <id column="two_id" property="id"/>
             <result column="two_pname" property="pname"/>
@@ -57,6 +57,7 @@
                 <id column="teachplanMeidaId" property="id"/>
                 <result column="mediaId" property="mediaId"/>
                 <result column="mediaFilename" property="mediaFilename"/>
+                <result column="teachplanId" property="teachplanId"/>
             </association>
         </collection>
 
@@ -85,13 +86,14 @@
                two.course_pub_id two_coursePubId,
                m.media_fileName  mediaFilename,
                m.id              teachplanMeidaId,
-               m.media_id        mediaId
+               m.media_id        mediaId,
+               m.teachplan_id    teachplanId
         FROM teachplan one
                  LEFT JOIN teachplan two ON two.parentid = one.id
                  LEFT JOIN teachplan_media m ON m.teachplan_id = two.id
-        WHERE one.course_id = #{courseId} AND one.parentid = 0
-        ORDER BY
-            one.orderby,
-            two.orderby
+        WHERE one.course_id = #{courseId}
+          AND one.parentid = 0
+        ORDER BY one.orderby,
+                 two.orderby
     </select>
 </mapper>
