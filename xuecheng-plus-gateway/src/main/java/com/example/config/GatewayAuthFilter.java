@@ -125,6 +125,11 @@ public class GatewayAuthFilter implements GlobalFilter, Ordered {
         return token;
     }
 
+    /**
+     * 设置filter的优先级
+     *
+     * @return 越低优先级越高
+     */
     @Override
     public int getOrder() {
         return 0;

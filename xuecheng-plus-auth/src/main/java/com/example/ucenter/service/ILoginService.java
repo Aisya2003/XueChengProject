@@ -3,8 +3,8 @@ package com.example.ucenter.service;
 import com.example.base.model.RestResponse;
 import com.example.ucenter.model.dto.FindPasswordDto;
 import com.example.ucenter.model.dto.RegisterParamsDto;
-import com.example.ucenter.model.po.XcUser;
-import com.example.ucenter.model.po.XcUserRole;
+import com.example.ucenter.model.po.User;
+import com.example.ucenter.model.po.UserRole;
 
 public interface ILoginService {
     /**
@@ -21,7 +21,7 @@ public interface ILoginService {
      * @param dto 参数
      * @return 用户实体
      */
-    XcUser buildUser(RegisterParamsDto dto);
+    User buildUser(RegisterParamsDto dto);
 
     /**
      * 获取权限用户实体
@@ -29,7 +29,7 @@ public interface ILoginService {
      * @param user 用户实体
      * @return 用户权限实体
      */
-    XcUserRole buildUserRole(XcUser user);
+    UserRole buildUserRole(User user);
 
     /**
      * 通过手机号找回密码

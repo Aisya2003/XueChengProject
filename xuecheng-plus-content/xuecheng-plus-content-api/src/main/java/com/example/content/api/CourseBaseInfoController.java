@@ -29,6 +29,7 @@ public class CourseBaseInfoController {
         this.baseInfoService = baseInfoService;
     }
 
+    //获取课程信息列表
     @PostMapping("/course/list")
     @PreAuthorize("hasAuthority('course_find_list')")
     public PageResult<CourseBase> list(PageParams params, @RequestBody QueryCourseParamsDto dto) {
@@ -39,6 +40,7 @@ public class CourseBaseInfoController {
         return baseInfoService.queryCourseBaseList(params, dto, companyId);
     }
 
+    //添加课程
     @PostMapping("/course")
     @PreAuthorize("hasAuthority('xc_teachmanager_course_add')")
     /*启用校验,设置校验分组*/

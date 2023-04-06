@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @Api(value = "大文件相关接口", tags = "大文件上传接口")
 public class BigFileController {
-    private IMediaFileService mediaFileService;
+    private final IMediaFileService mediaFileService;
 
     @Autowired
     public BigFileController(IMediaFileService mediaFileService) {
@@ -23,7 +23,7 @@ public class BigFileController {
 
     @ApiOperation(value = "文件上传前检查文件")
     @PostMapping("/upload/checkfile")
-    public RestResponse<Boolean> checkfile(
+    public RestResponse<Boolean> checkFile(
             @RequestParam("fileMd5") String fileMd5
     ) throws Exception {
         return mediaFileService.checkFile(fileMd5);
@@ -32,25 +32,25 @@ public class BigFileController {
 
     @ApiOperation(value = "分块文件上传前的检测")
     @PostMapping("/upload/checkchunk")
-    public RestResponse<Boolean> checkchunk(@RequestParam("fileMd5") String fileMd5,
+    public RestResponse<Boolean> checkChunk(@RequestParam("fileMd5") String fileMd5,
                                             @RequestParam("chunk") int chunk) throws Exception {
-        return mediaFileService.checkChunk(fileMd5,chunk);
+        return mediaFileService.checkChunk(fileMd5, chunk);
 
     }
 
     @ApiOperation(value = "上传分块文件")
     @PostMapping("/upload/uploadchunk")
-    public RestResponse uploadchunk(@RequestParam("file") MultipartFile file,
+    public RestResponse uploadChunk(@RequestParam("file") MultipartFile file,
                                     @RequestParam("fileMd5") String fileMd5,
                                     @RequestParam("chunk") int chunk) throws Exception {
-        return mediaFileService.uploadChunk(file,fileMd5,chunk);
+        return mediaFileService.uploadChunk(file, fileMd5, chunk);
 
 
     }
 
     @ApiOperation(value = "合并文件")
     @PostMapping("/upload/mergechunks")
-    public RestResponse mergechunks(@RequestParam("fileMd5") String fileMd5,
+    public RestResponse mergeChunks(@RequestParam("fileMd5") String fileMd5,
                                     @RequestParam("fileName") String fileName,
                                     @RequestParam("chunkTotal") int chunkTotal) throws Exception {
 
@@ -59,7 +59,7 @@ public class BigFileController {
         dto.setFileType("001002");
         dto.setFilename(fileName);
         dto.setTags("课程视频");
-        return mediaFileService.mergeChunks(companyId,fileMd5,fileName,chunkTotal,dto);
+        return mediaFileService.mergeChunks(companyId, fileMd5, fileName, chunkTotal, dto);
 
     }
 

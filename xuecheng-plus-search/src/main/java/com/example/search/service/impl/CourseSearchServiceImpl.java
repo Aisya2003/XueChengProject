@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.example.search.dto.SearchCourseParamDto;
 import com.example.search.dto.SearchPageResultDto;
 import com.example.search.po.CourseIndex;
-import com.example.search.service.CourseSearchService;
+import com.example.search.service.ICourseSearchService;
 import com.example.base.model.PageParams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +37,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class CourseSearchServiceImpl implements CourseSearchService {
+public class CourseSearchServiceImpl implements ICourseSearchService {
 
     @Value("${elasticsearch.course.index}")
     private String courseIndexStore;

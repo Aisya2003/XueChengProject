@@ -1,15 +1,13 @@
 package com.example.ucenter.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.example.base.exception.XuechengPlusException;
-import com.example.base.utils.StringUtil;
-import com.example.ucenter.mapper.XcMenuMapper;
+import com.example.base.exception.BusinessException;
+import com.example.ucenter.mapper.MenuMapper;
 import com.example.ucenter.model.dto.AuthParamsDto;
-import com.example.ucenter.model.dto.XcUserExt;
-import com.example.ucenter.model.po.XcMenu;
+import com.example.ucenter.model.dto.UserExt;
+import com.example.ucenter.model.po.Menu;
 import com.example.ucenter.service.IAuthService;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.userdetails.*;
@@ -27,12 +25,12 @@ public class UserServiceImpl implements UserDetailsService {
 
     //获取Spring容器
     private final ApplicationContext applicationContext;
-    private final XcMenuMapper xcMenuMapper;
+    private final MenuMapper menuMapper;
 
     @Autowired
-    public UserServiceImpl(ApplicationContext applicationContext, XcMenuMapper xcMenuMapper) {
+    public UserServiceImpl(ApplicationContext applicationContext, MenuMapper menuMapper) {
         this.applicationContext = applicationContext;
-        this.xcMenuMapper = xcMenuMapper;
+        this.menuMapper = menuMapper;
     }
 
 
@@ -56,7 +54,7 @@ public class UserServiceImpl implements UserDetailsService {
         //获取Bean
         IAuthService authService = applicationContext.getBean(authType + "Auth", IAuthService.class);
         //认证
-        XcUserExt userExt = authService.auth(authParamsDto);
+        UserExt userExt = authService.auth(authParamsDto);
 
         //构建认证信息
         return buildUserDetails(userExt);
@@ -70,7 +68,7 @@ public class UserServiceImpl implements UserDetailsService {
      * @param userExt 用户信息
      * @return userDetail
      */
-    private UserDetails buildUserDetails(XcUserExt userExt) {
+    private UserDetails buildUserDetails(UserExt userExt) {
 
         //获取用户权限数组
         String[] authorities = buildUserAuthorities(userExt.getId());
@@ -92,7 +90,7 @@ public class UserServiceImpl implements UserDetailsService {
      * @return 权限信息数组
      */
     private String[] buildUserAuthorities(String userId) {
-        List<XcMenu> userAuthoritiesList = xcMenuMapper.getAuthoritiesByUserId(userId);
+        List<Menu> userAuthoritiesList = menuMapper.getAuthoritiesByUserId(userId);
         //获取用户权限
         List<String> itemList = new ArrayList<>();
         userAuthoritiesList.forEach(menu -> {
@@ -109,7 +107,7 @@ public class UserServiceImpl implements UserDetailsService {
         }
         //登录的用户没有任何权限
         if (authorities == null) {
-            XuechengPlusException.cast("非法用户！");
+            BusinessException.cast("非法用户！");
         }
         return authorities;
     }

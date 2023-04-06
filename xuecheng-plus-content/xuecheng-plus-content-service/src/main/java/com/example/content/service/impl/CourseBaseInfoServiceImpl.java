@@ -3,7 +3,7 @@ package com.example.content.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.base.constant.Dictionary;
-import com.example.base.exception.XuechengPlusException;
+import com.example.base.exception.BusinessException;
 import com.example.base.model.PageParams;
 import com.example.base.model.PageResult;
 import com.example.content.mapper.CourseBaseMapper;
@@ -53,7 +53,7 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
         //2.拼接查询条件
         //校验机构ID
         if (StringUtils.isEmpty(companyId)) {
-            XuechengPlusException.cast("机构不存在！");
+            BusinessException.cast("机构不存在！");
         }
         queryWrapper.eq(CourseBase::getCompanyId, companyId);
         //2.1根据课程名称模糊查询
@@ -73,14 +73,14 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
         //4.查询得到分页结果
         Page<CourseBase> pageResultRaw = courseBaseMapper.selectPage(page, queryWrapper);
         //5.封装为PageResult对象
-        PageResult<CourseBase> pageResult = new PageResult<>(
+
+        return new PageResult<>(
                 pageResultRaw.getRecords(),//查询结果
                 pageResultRaw.getTotal(),//总数
                 params.getPageNo(),//页码
                 params.getPageSize()//每页最大记录数
         );
 
-        return pageResult;
 
     }
 
@@ -149,8 +149,8 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
             throw new RuntimeException("添加课程失败");
         }
         //组装返回结果，需要返回一个CourseBaseInfoDto对象
-        CourseBaseInfoDto courseBaseInfoDto = getCourseBaseInfoDto(courseId);
-        return courseBaseInfoDto;
+        return getCourseBaseInfoDto(courseId);
+
     }
 
     /**
@@ -208,11 +208,11 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
         Long id = dto.getId();
         CourseBase courseBase = courseBaseMapper.selectById(id);
         if (courseBase == null) {
-            throw new XuechengPlusException("课程不存在！");
+            throw new BusinessException("课程不存在！");
         }
         //机构id
         if (courseBase.getCompanyId() != companyId) {
-            throw new XuechengPlusException("只能修改本机构的课程！");
+            throw new BusinessException("只能修改本机构的课程！");
         }
         //封装基本信息的数据
         BeanUtils.copyProperties(dto, courseBase);
@@ -230,11 +230,16 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
 
 
         //查询课程基本信息
-        CourseBaseInfoDto courseBaseInfoDto = this.getCourseBaseInfoDto(courseBase.getId());
 
-        return courseBaseInfoDto;
+        return this.getCourseBaseInfoDto(courseBase.getId());
     }
 
+    /**
+     * 保存课程到营销表
+     *
+     * @param courseMarket 课程营销信息
+     * @return 插入结果 1成功，0失败
+     */
     private int saveCourseMarket(CourseMarket courseMarket) {
         //判断课程是否收费，如果是则必须设置价格
         if (Dictionary.COURSE_CHARGE.getCode().equals(courseMarket.getCharge())) {

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.system.mapper.DictionaryMapper;
 import com.example.system.model.po.Dictionary;
-import com.example.system.service.DictionaryService;
+import com.example.system.service.IDictionaryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,21 +19,18 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class DictionaryServiceImpl extends ServiceImpl<DictionaryMapper, Dictionary> implements DictionaryService {
+public class DictionaryServiceImpl extends ServiceImpl<DictionaryMapper, Dictionary> implements IDictionaryService {
 
     @Override
     public List<Dictionary> queryAll() {
-        return this.list();
+        return list();
     }
 
     @Override
     public Dictionary getByCode(String code) {
 
-
         LambdaQueryWrapper<Dictionary> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Dictionary::getCode, code);
-
-
         return this.getOne(queryWrapper);
     }
 }

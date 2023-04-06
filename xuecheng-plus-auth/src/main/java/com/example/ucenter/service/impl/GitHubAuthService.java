@@ -3,13 +3,13 @@ package com.example.ucenter.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.auth.util.RestTemplateUtil;
 import com.example.base.utils.StringUtil;
-import com.example.ucenter.mapper.XcUserMapper;
-import com.example.ucenter.mapper.XcUserRoleMapper;
+import com.example.ucenter.mapper.UserMapper;
+import com.example.ucenter.mapper.UserRoleMapper;
 import com.example.ucenter.model.dto.AuthParamsDto;
 import com.example.ucenter.model.dto.TokenDto;
-import com.example.ucenter.model.dto.XcUserExt;
-import com.example.ucenter.model.po.XcUser;
-import com.example.ucenter.model.po.XcUserRole;
+import com.example.ucenter.model.dto.UserExt;
+import com.example.ucenter.model.po.User;
+import com.example.ucenter.model.po.UserRole;
 import com.example.ucenter.service.IAuthService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,8 +33,8 @@ import java.util.*;
 public class GitHubAuthService implements IAuthService {
     private final RestTemplateUtil restTemplateUtil;
     private final PasswordEncoder passwordEncoder;
-    private final XcUserMapper xcUserMapper;
-    private final XcUserRoleMapper xcUserRoleMapper;
+    private final UserMapper userMapper;
+    private final UserRoleMapper userRoleMapper;
     private final GitHubAuthService proxy;
     private final StringRedisTemplate stringRedisTemplate;
 
@@ -45,23 +45,23 @@ public class GitHubAuthService implements IAuthService {
 
     @Autowired
     @Lazy
-    public GitHubAuthService(RestTemplateUtil restTemplateUtil, PasswordEncoder passwordEncoder, XcUserMapper xcUserMapper, XcUserRoleMapper xcUserRoleMapper, GitHubAuthService proxy, StringRedisTemplate stringRedisTemplate) {
+    public GitHubAuthService(RestTemplateUtil restTemplateUtil, PasswordEncoder passwordEncoder, UserMapper userMapper, UserRoleMapper userRoleMapper, GitHubAuthService proxy, StringRedisTemplate stringRedisTemplate) {
         this.restTemplateUtil = restTemplateUtil;
         this.passwordEncoder = passwordEncoder;
-        this.xcUserMapper = xcUserMapper;
-        this.xcUserRoleMapper = xcUserRoleMapper;
+        this.userMapper = userMapper;
+        this.userRoleMapper = userRoleMapper;
         this.proxy = proxy;
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
 
     @Override
-    public XcUserExt auth(AuthParamsDto dto) {
+    public UserExt auth(AuthParamsDto dto) {
         //开始验证
         String username = dto.getUsername();
-        XcUser user = xcUserMapper.selectOne(
-                new LambdaQueryWrapper<XcUser>().eq(!StringUtil.isEmpty(username),
-                        XcUser::getUsername,
+        User user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(!StringUtil.isEmpty(username),
+                        User::getUsername,
                         username));
         if (user == null) {
             throw new RuntimeException("用户不存在！");
@@ -74,13 +74,13 @@ public class GitHubAuthService implements IAuthService {
 
 
         user.setPassword("user-password");
-        XcUserExt userExt = new XcUserExt();
+        UserExt userExt = new UserExt();
         BeanUtils.copyProperties(user, userExt);
         //登录结束
         stringRedisTemplate.delete("login:github:" + githubUnionid);
         return userExt;
     }
-    
+
 
     /**
      * 获取GitHub用户信息
@@ -88,13 +88,13 @@ public class GitHubAuthService implements IAuthService {
      * @param code 临时code
      * @return 用户实体
      */
-    public XcUser getUser(String code) {
+    public User getUser(String code) {
         //通用的Header
         HttpHeaders headers = new HttpHeaders();
         //获取token，设置header的content-type
         TokenDto accessToken = getTokenDto(code, headers);
         //从资源服务器获取用户信息
-        XcUser userInfo = getUserInfo(headers, accessToken);
+        User userInfo = getUserInfo(headers, accessToken);
 
         //登录信息存储至redis临时保存
         stringRedisTemplate.opsForValue().setIfAbsent(
@@ -111,7 +111,7 @@ public class GitHubAuthService implements IAuthService {
      * @param accessToken token令牌
      * @return 用户实体
      */
-    private XcUser getUserInfo(HttpHeaders headers, TokenDto accessToken) {
+    private User getUserInfo(HttpHeaders headers, TokenDto accessToken) {
         //携带token的信息
         headers.set("Authorization", "token " + accessToken.getAccess_token());
         String getUserInfoUrl = "https://api.github.com/user";
@@ -131,37 +131,37 @@ public class GitHubAuthService implements IAuthService {
 
 
         //查询用户
-        LambdaQueryWrapper<XcUser> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(!StringUtil.isEmpty(githubId), XcUser::getGithubUnionid, githubId);
-        XcUser userFromDB = xcUserMapper.selectOne(queryWrapper);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(!StringUtil.isEmpty(githubId), User::getGithubUnionid, githubId);
+        User userFromDB = userMapper.selectOne(queryWrapper);
         if (userFromDB != null) return userFromDB;
 
         //第一次授权，添加用户信息到数据库
-        XcUser xcUser = null;
-        XcUserRole xcUserRole = null;
+        User user = null;
+        UserRole userRole = null;
         //封装用户信息
         String userId = UUID.randomUUID().toString();
-        xcUser = buildUser(userId, userName, githubId);
+        user = buildUser(userId, userName, githubId);
         //封装用户权限
-        xcUserRole = buildUserRole(userId);
+        userRole = buildUserRole(userId);
 
         //添加信息到数据库
-        Boolean result = proxy.addUserAndUserRole(xcUser, xcUserRole);
+        Boolean result = proxy.addUserAndUserRole(user, userRole);
 
-        return result ? xcUser : null;
+        return result ? user : null;
     }
 
     /**
      * 保存信息到数据库
      *
-     * @param xcUser     用户实体
-     * @param xcUserRole 用户权限实体
+     * @param user     用户实体
+     * @param userRole 用户权限实体
      * @return 插入结果
      */
     @Transactional
-    public Boolean addUserAndUserRole(XcUser xcUser, XcUserRole xcUserRole) {
-        int insertUser = xcUserMapper.insert(xcUser);
-        int insertRole = xcUserRoleMapper.insert(xcUserRole);
+    public Boolean addUserAndUserRole(User user, UserRole userRole) {
+        int insertUser = userMapper.insert(user);
+        int insertRole = userRoleMapper.insert(userRole);
         return insertUser > 0 && insertRole > 0;
     }
 
@@ -171,14 +171,14 @@ public class GitHubAuthService implements IAuthService {
      * @param userId 用户id
      * @return 用户权限实体
      */
-    private XcUserRole buildUserRole(String userId) {
-        XcUserRole xcUserRole = new XcUserRole();
+    private UserRole buildUserRole(String userId) {
+        UserRole userRole = new UserRole();
         String userRoleId = UUID.randomUUID().toString();
-        xcUserRole.setId(userRoleId);
-        xcUserRole.setUserId(userId);
-        xcUserRole.setCreateTime(LocalDateTime.now());
-        xcUserRole.setRoleId("17");
-        return xcUserRole;
+        userRole.setId(userRoleId);
+        userRole.setUserId(userId);
+        userRole.setCreateTime(LocalDateTime.now());
+        userRole.setRoleId("17");
+        return userRole;
     }
 
     /**
@@ -189,18 +189,18 @@ public class GitHubAuthService implements IAuthService {
      * @param githubId GitHub唯一表示
      * @return 用户实体
      */
-    private XcUser buildUser(String userId, String userName, String githubId) {
-        XcUser xcUser = new XcUser();
-        xcUser.setUsername(userName);
-        xcUser.setCreateTime(LocalDateTime.now());
-        xcUser.setStatus("1");
-        xcUser.setId(userId);
-        xcUser.setGithubUnionid(githubId);
-        xcUser.setUtype("101001");
-        xcUser.setPassword(passwordEncoder.encode(userId));
-        xcUser.setName(userName);
-        xcUser.setNickname(userName);
-        return xcUser;
+    private User buildUser(String userId, String userName, String githubId) {
+        User user = new User();
+        user.setUsername(userName);
+        user.setCreateTime(LocalDateTime.now());
+        user.setStatus("1");
+        user.setId(userId);
+        user.setGithubUnionid(githubId);
+        user.setUtype("101001");
+        user.setPassword(passwordEncoder.encode(userId));
+        user.setName(userName);
+        user.setNickname(userName);
+        return user;
     }
 
     /**

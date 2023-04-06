@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 public class TokenConfig {
@@ -39,7 +40,7 @@ public class TokenConfig {
 
         //令牌增强策略
         TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
-        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(jwtAccessTokenConverter()));
+        tokenEnhancerChain.setTokenEnhancers(Collections.singletonList(jwtAccessTokenConverter()));
         defaultTokenServices.setTokenEnhancer(tokenEnhancerChain);
 
         //设置刷新令牌的有效时间

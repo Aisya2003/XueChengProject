@@ -14,14 +14,14 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class CoursePublishController {
-    private ICoursePublishService coursePublishService;
+    private final ICoursePublishService coursePublishService;
 
     @Autowired
     public CoursePublishController(ICoursePublishService coursePublishService) {
         this.coursePublishService = coursePublishService;
     }
 
-    @ApiOperation("课程信息预览数据生成")
+    //生成发布课程数据
     @GetMapping("/coursepreview/{courseId}")
     public ModelAndView preview(@PathVariable("courseId") Long courseId) {
         ModelAndView modelAndView = new ModelAndView();

@@ -22,18 +22,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 
-/**
- * @author Mr.M
- * @version 1.0
- * @description TODO
- * @date 2022/10/15 22:13
- */
 @Configuration
 @EnableFeignClients(basePackages = "com.example.content.feignclient")
 public class MultipartSupportConfig {
 
+
+    private final ObjectFactory<HttpMessageConverters> messageConverters;
+
     @Autowired
-    private ObjectFactory<HttpMessageConverters> messageConverters;
+    public MultipartSupportConfig(ObjectFactory<HttpMessageConverters> messageConverters) {
+        this.messageConverters = messageConverters;
+    }
 
     @Bean
     @Primary//注入相同类型的bean时优先使用

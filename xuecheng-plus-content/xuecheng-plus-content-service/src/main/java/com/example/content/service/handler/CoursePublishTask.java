@@ -1,6 +1,6 @@
 package com.example.content.service.handler;
 
-import com.example.base.exception.XuechengPlusException;
+import com.example.base.exception.BusinessException;
 import com.example.content.service.ICoursePublishService;
 import com.example.messagesdk.model.po.MqMessage;
 import com.example.messagesdk.service.MessageProcessAbstract;
@@ -24,6 +24,7 @@ public class CoursePublishTask extends MessageProcessAbstract {
     }
 
 
+    //执行任务
     @XxlJob("CoursePublishHandler")
     public void coursePublishHandler() throws Exception {
         int shardIndex = XxlJobHelper.getShardIndex();
@@ -31,6 +32,12 @@ public class CoursePublishTask extends MessageProcessAbstract {
         process(shardIndex, shardTotal, "course_publish", 5, 60);
     }
 
+    /**
+     * 从mq-message表中获取任务，开始执行
+     *
+     * @param mqMessage 执行任务内容
+     * @return 执行结果
+     */
     @Override
     public boolean execute(MqMessage mqMessage) {
         //businessKey约定为课程ID
@@ -56,7 +63,7 @@ public class CoursePublishTask extends MessageProcessAbstract {
         //判断第一阶段任务是否已完成
         Long id = mqMessage.getId();
         if (id == null) {
-            XuechengPlusException.cast("消息不存在！");
+            BusinessException.cast("消息不存在！");
         }
         //获取MqMessageService注入
         MqMessageService mqMessageService = this.getMqMessageService();
@@ -82,7 +89,7 @@ public class CoursePublishTask extends MessageProcessAbstract {
         //判断第一阶段任务是否已完成
         Long id = mqMessage.getId();
         if (id == null) {
-            XuechengPlusException.cast("消息不存在！");
+            BusinessException.cast("消息不存在！");
         }
         //获取MqMessageService注入
         MqMessageService mqMessageService = this.getMqMessageService();
@@ -95,7 +102,7 @@ public class CoursePublishTask extends MessageProcessAbstract {
         //生成静态页面
         File htmlFile = coursePublishService.generateHtml(courseId);
         if (htmlFile == null) {
-            XuechengPlusException.cast("静态化失败！");
+            BusinessException.cast("静态化失败！");
         }
         //上传MinIo
         coursePublishService.uploadHTMLToMinIo(htmlFile, courseId);

@@ -1,0 +1,31 @@
+nacosAddr: 127.0.0.1:8848
+nacosNameSpace: 1a69680d-6377-4849-bf44-b9e803de94cc
+nacosGroup: xuecheng-plus-project
+#微服务配置
+spring:
+  application:
+    name: orders-api
+  cloud:
+    nacos:
+      server-addr: ${nacosAddr}
+      discovery:
+        namespace: ${nacosNameSpace}
+        group: ${nacosGroup}
+      config:
+        namespace: ${nacosNameSpace}
+        group: ${nacosGroup}
+        file-extension: yaml
+        refresh-enabled: true
+        extension-configs:
+          - data-id: orders-service-${spring.profiles.active}.yaml
+            group: xuecheng-plus-project
+            refresh: true
+        shared-configs:
+          - data-id: logging-${spring.profiles.active}.yaml
+            group: xuecheng-plus-common
+            refresh: true
+          - data-id: rabbitmq-${spring.profiles.active}.yaml
+            group: xuecheng-plus-common
+            refresh: true
+  profiles:
+    active: dev

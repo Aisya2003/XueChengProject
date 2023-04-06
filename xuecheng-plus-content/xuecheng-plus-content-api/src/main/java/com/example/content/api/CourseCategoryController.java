@@ -12,9 +12,8 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@Api(value = "课程分类相关接口",tags = "课程分类相关接口")
 public class CourseCategoryController {
-    private ICourseCategoryService service;
+    private final ICourseCategoryService service;
 
     @Autowired
     public CourseCategoryController(ICourseCategoryService service) {
@@ -22,11 +21,12 @@ public class CourseCategoryController {
     }
 
     /**
-     *课程分类查询接口
+     * 课程分类查询接口
+     *
      * @return 树形结构
      */
     @GetMapping("/course-category/tree-nodes")
     public List<CourseCategoryDto> queryTreeNodes() {
-        return  service.queryTreeNodes("1");
+        return service.queryTreeNodes("1");
     }
 }

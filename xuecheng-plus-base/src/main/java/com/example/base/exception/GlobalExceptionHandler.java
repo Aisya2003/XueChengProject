@@ -15,9 +15,9 @@ import java.util.List;
 public class GlobalExceptionHandler {
     //处理自定义XuechengPlusException，可预知异常
     @ResponseBody//返回为JSON
-    @ExceptionHandler(XuechengPlusException.class)
+    @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)//定义返回的异常Code 500
-    public RestErrorResponse handleXuechengPlusException(XuechengPlusException e) {
+    public RestErrorResponse handleXuechengPlusException(BusinessException e) {
 
 
         String errMessage = e.getErrMessage();

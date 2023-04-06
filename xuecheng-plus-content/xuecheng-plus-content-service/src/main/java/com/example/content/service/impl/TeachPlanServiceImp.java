@@ -1,14 +1,14 @@
 package com.example.content.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.example.base.exception.XuechengPlusException;
-import com.example.content.mapper.TeachplanMapper;
-import com.example.content.mapper.TeachplanMediaMapper;
+import com.example.base.exception.BusinessException;
+import com.example.content.mapper.TeachPlanMapper;
+import com.example.content.mapper.TeachPlanMediaMapper;
 import com.example.content.model.dto.BindTeachPlanMediaDto;
-import com.example.content.model.dto.SaveTeachplanDto;
+import com.example.content.model.dto.SaveTeachPlanDto;
 import com.example.content.model.dto.TeachPlanDto;
-import com.example.content.model.po.Teachplan;
-import com.example.content.model.po.TeachplanMedia;
+import com.example.content.model.po.TeachPlanMedia;
+import com.example.content.model.po.TeachPlan;
 import com.example.content.service.ITeachPlanService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,28 +19,27 @@ import java.util.List;
 
 @Service
 public class TeachPlanServiceImp implements ITeachPlanService {
-    private final TeachplanMapper teachplanMapper;
-    private final TeachplanMediaMapper teachplanMediaMapper;
+    private final TeachPlanMapper teachplanMapper;
+    private final TeachPlanMediaMapper teachplanMediaMapper;
 
     @Autowired
-    public TeachPlanServiceImp(TeachplanMapper teachplanMapper, TeachplanMediaMapper teachplanMediaMapper) {
+    public TeachPlanServiceImp(TeachPlanMapper teachplanMapper, TeachPlanMediaMapper teachplanMediaMapper) {
         this.teachplanMapper = teachplanMapper;
         this.teachplanMediaMapper = teachplanMediaMapper;
     }
 
     @Override
     public List<TeachPlanDto> selectTeachPlanTree(Long courseId) {
-        List<TeachPlanDto> teachPlanDtos = teachplanMapper.selectTreeNodes(courseId);
-        return teachPlanDtos;
+        return teachplanMapper.selectTreeNodes(courseId);
     }
 
     @Override
-    public void saveTeachPlan(SaveTeachplanDto dto) {
+    public void saveTeachPlan(SaveTeachPlanDto dto) {
         //先查询是否存在数据
-        Teachplan teachplan = teachplanMapper.selectById(dto.getId());
+        TeachPlan teachplan = teachplanMapper.selectById(dto.getId());
         if (teachplan == null) {
             //添加到数据库中
-            teachplan = new Teachplan();
+            teachplan = new TeachPlan();
             BeanUtils.copyProperties(dto, teachplan);
             //设置orderBy的的值
             int orderBy = getTeachPlanCount(dto.getCourseId(), dto.getParentid());
@@ -55,24 +54,24 @@ public class TeachPlanServiceImp implements ITeachPlanService {
     }
 
     @Override
-    public TeachplanMedia bindMedia(BindTeachPlanMediaDto dto) {
+    public TeachPlanMedia bindMedia(BindTeachPlanMediaDto dto) {
         //约束校验
         Long teachplanId = dto.getTeachplanId();
-        Teachplan teachplan = teachplanMapper.selectById(teachplanId);
+        TeachPlan teachplan = teachplanMapper.selectById(teachplanId);
         //教学计划不存在
         if (teachplan == null) {
-            XuechengPlusException.cast("课程计划不存在！");
+            BusinessException.cast("课程计划不存在！");
         }
         //只有二级目录可以绑定关系
         if (teachplan.getGrade() != 2) {
-            XuechengPlusException.cast("只有二级目录可以绑定！");
+            BusinessException.cast("只有二级目录可以绑定！");
         }
         //删除原来绑定关系
-        LambdaQueryWrapper<TeachplanMedia> deleteMapper = new LambdaQueryWrapper<>();
-        deleteMapper.eq(TeachplanMedia::getTeachplanId, teachplanId);
+        LambdaQueryWrapper<TeachPlanMedia> deleteMapper = new LambdaQueryWrapper<>();
+        deleteMapper.eq(TeachPlanMedia::getTeachplanId, teachplanId);
         teachplanMediaMapper.delete(deleteMapper);
         //添加关系
-        TeachplanMedia teachplanMedia = new TeachplanMedia();
+        TeachPlanMedia teachplanMedia = new TeachPlanMedia();
         teachplanMedia.setMediaId(dto.getMediaId());
         teachplanMedia.setMediaFilename(dto.getFileName());
         teachplanMedia.setTeachplanId(teachplanId);
@@ -83,9 +82,9 @@ public class TeachPlanServiceImp implements ITeachPlanService {
     }
 
     private int getTeachPlanCount(Long courseId, Long parentid) {
-        LambdaQueryWrapper<Teachplan> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(courseId != null, Teachplan::getCourseId, courseId);
-        queryWrapper.eq(parentid != null, Teachplan::getParentid, parentid);
+        LambdaQueryWrapper<TeachPlan> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(courseId != null, TeachPlan::getCourseId, courseId);
+        queryWrapper.eq(parentid != null, TeachPlan::getParentid, parentid);
         Integer count = teachplanMapper.selectCount(queryWrapper);
         return count.intValue();
     }

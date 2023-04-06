@@ -1,6 +1,6 @@
 package com.example.media.api;
 
-import com.example.base.exception.XuechengPlusException;
+import com.example.base.exception.BusinessException;
 import com.example.base.model.PageParams;
 import com.example.base.model.PageResult;
 import com.example.base.model.RestResponse;
@@ -29,11 +29,14 @@ import java.io.IOException;
 public class MediaFilesController {
 
 
+    private final IMediaFileService mediaFileService;
+
     @Autowired
-    IMediaFileService mediaFileService;
+    public MediaFilesController(IMediaFileService mediaFileService) {
+        this.mediaFileService = mediaFileService;
+    }
 
-
-    @ApiOperation("媒资列表查询接口")
+    //查询媒资文件
     @PostMapping("/files")
     public PageResult<MediaFiles> list(PageParams pageParams, @RequestBody QueryMediaParamsDto queryMediaParamsDto) {
         Long companyId = 22L;
@@ -53,8 +56,8 @@ public class MediaFilesController {
     @RequestMapping(value = "/upload/coursefile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public UploadMediaFilesDto upLoad(
             @RequestPart("filedata") MultipartFile fileData,
-            @RequestParam(value = "folder",required = false) String folder,
-            @RequestParam(value = "objectName",required = false)String objectName) {
+            @RequestParam(value = "folder", required = false) String folder,
+            @RequestParam(value = "objectName", required = false) String objectName) {
         /**
          * 上传文件的字节流，提高接口通用性
          */
@@ -65,10 +68,10 @@ public class MediaFilesController {
         dto.setFileSize(fileData.getSize());
         dto.setFilename(fileData.getOriginalFilename());
         //设置文件类型
-        if (fileData.getContentType().contains("image")){
+        if (fileData.getContentType().contains("image")) {
             //图片
             dto.setFileType("001001");
-        }else{
+        } else {
             //非图片
             dto.setFileType("001003");
         }
@@ -76,19 +79,20 @@ public class MediaFilesController {
         try {
             uploadMediaFilesDto = mediaFileService.uploadFiles(companyId, dto, fileData.getBytes(), folder, objectName);
         } catch (IOException e) {
-            throw new XuechengPlusException("上传过程失败！");
+            throw new BusinessException("上传过程失败！");
         }
         return uploadMediaFilesDto;
     }
 
     /**
-     *根据文件id获取文件在线查看的Url
+     * 根据文件id获取文件在线查看的Url
+     *
      * @param mediaId 文件的Id
      * @return 查看地址
      */
     @ApiOperation("预览文件")
     @GetMapping("/preview/{mediaId}")
-    public RestResponse<String> getUrlByMediaId(@PathVariable("mediaId")String mediaId){
+    public RestResponse<String> getUrlByMediaId(@PathVariable("mediaId") String mediaId) {
 
         return mediaFileService.getFileUrlById(mediaId);
     }

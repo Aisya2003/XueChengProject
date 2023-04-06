@@ -2,8 +2,8 @@ package com.example.search.service.impl;
 
 import com.alibaba.fastjson.JSON;
 
-import com.example.base.exception.XuechengPlusException;
-import com.example.search.service.IndexService;
+import com.example.base.exception.BusinessException;
+import com.example.search.service.IIndexService;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -22,7 +22,7 @@ import java.io.IOException;
 
 @Slf4j
 @Service
-public class IndexServiceImpl implements IndexService {
+public class IndexServiceImpl implements IIndexService {
 
 
     private final RestHighLevelClient client;
@@ -45,7 +45,7 @@ public class IndexServiceImpl implements IndexService {
         } catch (IOException e) {
             log.error("添加索引出错:{}", e.getMessage());
             e.printStackTrace();
-            XuechengPlusException.cast("添加索引出错");
+            BusinessException.cast("添加索引出错");
         }
         String name = indexResponse.getResult().name();
         return name.equalsIgnoreCase("created") || name.equalsIgnoreCase("updated");
@@ -64,7 +64,7 @@ public class IndexServiceImpl implements IndexService {
         } catch (IOException e) {
             log.error("更新索引出错:{}", e.getMessage());
             e.printStackTrace();
-            XuechengPlusException.cast("更新索引出错");
+            BusinessException.cast("更新索引出错");
         }
         DocWriteResponse.Result result = updateResponse.getResult();
         return result.name().equalsIgnoreCase("updated");
@@ -83,7 +83,7 @@ public class IndexServiceImpl implements IndexService {
         } catch (IOException e) {
             log.error("删除索引出错:{}", e.getMessage());
             e.printStackTrace();
-            XuechengPlusException.cast("删除索引出错");
+            BusinessException.cast("删除索引出错");
         }
         //获取响应结果
         DocWriteResponse.Result result = deleteResponse.getResult();

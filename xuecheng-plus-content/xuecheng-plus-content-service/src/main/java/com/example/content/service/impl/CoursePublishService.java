@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.base.constant.Dictionary;
-import com.example.base.exception.XuechengPlusException;
+import com.example.base.exception.BusinessException;
 import com.example.content.config.MultipartSupportConfig;
 import com.example.content.feignclient.CourseIndex;
 import com.example.content.feignclient.MediaServiceClient;
@@ -104,25 +104,25 @@ public class CoursePublishService extends ServiceImpl<CoursePublishPreMapper, Co
         //校验课程基本信息
         CourseBaseInfoDto courseBase = courseBaseInfoService.getCourseBaseInfoDto(courseId);
         if (courseBase == null) {
-            XuechengPlusException.cast("课程不存在！");
+            BusinessException.cast("课程不存在！");
             return;
         }
         if (!courseBase.getCompanyId().equals(companyId)) {
-            XuechengPlusException.cast("非本机构课程不能提交！");
+            BusinessException.cast("非本机构课程不能提交！");
             return;
         }
         if (StringUtils.isEmpty(courseBase.getPic())) {
-            XuechengPlusException.cast("课程图片不能为空！");
+            BusinessException.cast("课程图片不能为空！");
             return;
         }
         String auditStatus = courseBase.getAuditStatus();
         if (Dictionary.AUDIT_COURSE_COMMIT.getCode().equals(auditStatus)) {
-            XuechengPlusException.cast("课程正在审核中，等待审核完成才可再次提交！");
+            BusinessException.cast("课程正在审核中，等待审核完成才可再次提交！");
         }
         //校验课程计划
         List<TeachPlanDto> teachPlanDtos = teachPlanService.selectTeachPlanTree(courseId);
         if (teachPlanDtos.size() <= 0) {
-            XuechengPlusException.cast("该课程还没有设置课程计划！");
+            BusinessException.cast("该课程还没有设置课程计划！");
             return;
         }
 
@@ -175,15 +175,15 @@ public class CoursePublishService extends ServiceImpl<CoursePublishPreMapper, Co
         //校验是否提交审核
         CoursePublishPre coursePublishPre = coursePublishPreMapper.selectById(courseId);
         if (coursePublishPre == null) {
-            XuechengPlusException.cast("请先提交审核！");
+            BusinessException.cast("请先提交审核！");
         }
         //校验机构
         if (!coursePublishPre.getCompanyId().equals(companyId)) {
-            XuechengPlusException.cast("非本机构课程不允许发布！");
+            BusinessException.cast("非本机构课程不允许发布！");
         }
         //校验审核状态
         if (!coursePublishPre.getStatus().equals(Dictionary.AUDIT_COURSE_PASS.getCode())) {
-            XuechengPlusException.cast("课程审核通过后才可以发布！");
+            BusinessException.cast("课程审核通过后才可以发布！");
         }
 
         //保存课程到发布表
@@ -241,7 +241,7 @@ public class CoursePublishService extends ServiceImpl<CoursePublishPreMapper, Co
         String result = mediaServiceClient.upLoad(multipartFile, "course", courseId + ".html");
         //校验结果
         if (result == null) {
-            XuechengPlusException.cast("远程调用失败！");
+            BusinessException.cast("远程调用失败！");
         }
 
     }
@@ -255,7 +255,7 @@ public class CoursePublishService extends ServiceImpl<CoursePublishPreMapper, Co
     public void saveToMessage(Long courseId) {
         MqMessage course_publish = mqMessageService.addMessage("course_publish", String.valueOf(courseId), null, null);
         if (course_publish == null) {
-            XuechengPlusException.cast("添加消息失败！");
+            BusinessException.cast("添加消息失败！");
         }
     }
 
@@ -292,7 +292,7 @@ public class CoursePublishService extends ServiceImpl<CoursePublishPreMapper, Co
         CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
         if (coursePublish == null) {
             log.error("添加索引的记录不存在,索引ID:{}", courseId);
-            XuechengPlusException.cast("添加索引的记录不存在！");
+            BusinessException.cast("添加索引的记录不存在！");
         }
         CourseIndex courseIndex = new CourseIndex();
         //拷贝
@@ -300,7 +300,7 @@ public class CoursePublishService extends ServiceImpl<CoursePublishPreMapper, Co
 
         Boolean result = searchServiceClient.add(courseIndex);
         if (result == null) {
-            XuechengPlusException.cast("创建课程索引失败！");
+            BusinessException.cast("创建课程索引失败！");
         }
         return result;
     }
@@ -308,7 +308,7 @@ public class CoursePublishService extends ServiceImpl<CoursePublishPreMapper, Co
     @Override
     public CoursePublish getCoursePublishByCourseId(Long courseId) {
         if (courseId == null) {
-            XuechengPlusException.cast("课程号不能为空！");
+            BusinessException.cast("课程号不能为空！");
         }
         return coursePublishMapper.selectById(courseId);
     }

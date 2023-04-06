@@ -1,17 +1,16 @@
 package com.example.ucenter.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.example.base.exception.XuechengPlusException;
+import com.example.base.exception.BusinessException;
 import com.example.base.model.RestResponse;
 import com.example.base.utils.StringUtil;
-import com.example.ucenter.mapper.XcUserMapper;
+import com.example.ucenter.mapper.UserMapper;
 import com.example.ucenter.model.dto.AuthParamsDto;
 import com.example.ucenter.model.dto.FindPasswordDto;
 import com.example.ucenter.model.dto.RegisterParamsDto;
-import com.example.ucenter.model.po.XcUser;
-import com.example.ucenter.model.po.XcUserRole;
+import com.example.ucenter.model.po.User;
+import com.example.ucenter.model.po.UserRole;
 import com.example.ucenter.service.ILoginService;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,15 +20,15 @@ import java.util.UUID;
 
 @Service
 public class LoginServiceImpl implements ILoginService {
-    private final XcUserMapper xcUserMapper;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final PasswordAuthService passwordAuthService;
     private final GitHubAuthService gitHubAuthService;
 
 
     @Autowired
-    public LoginServiceImpl(XcUserMapper xcUserMapper, PasswordEncoder passwordEncoder, PasswordAuthService passwordAuthService, GitHubAuthService gitHubAuthService) {
-        this.xcUserMapper = xcUserMapper;
+    public LoginServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder, PasswordAuthService passwordAuthService, GitHubAuthService gitHubAuthService) {
+        this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.passwordAuthService = passwordAuthService;
         this.gitHubAuthService = gitHubAuthService;
@@ -38,20 +37,20 @@ public class LoginServiceImpl implements ILoginService {
     @Override
     public RestResponse<Boolean> register(RegisterParamsDto dto) {
         String username = dto.getUsername();
-        XcUser userFromDB = xcUserMapper.selectOne(new LambdaQueryWrapper<XcUser>().eq(!StringUtil.isEmpty(username), XcUser::getUsername, username));
+        User userFromDB = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(!StringUtil.isEmpty(username), User::getUsername, username));
         if (userFromDB != null) {
-            XuechengPlusException.cast("用户名已存在！");
+            BusinessException.cast("用户名已存在！");
         }
 
 
-        XcUser user = buildUser(dto);
-        XcUserRole userRole = buildUserRole(user);
+        User user = buildUser(dto);
+        UserRole userRole = buildUserRole(user);
         Boolean result = gitHubAuthService.addUserAndUserRole(user, userRole);
         return result ? RestResponse.success() : null;
     }
 
     @Override
-    public XcUser buildUser(RegisterParamsDto dto) {
+    public User buildUser(RegisterParamsDto dto) {
         //校验验证码
         AuthParamsDto checkCodeDto = new AuthParamsDto();
         checkCodeDto.setCheckcode(dto.getCheckcode());
@@ -59,7 +58,7 @@ public class LoginServiceImpl implements ILoginService {
         passwordAuthService.checkCode(checkCodeDto);
 
 
-        XcUser user = new XcUser();
+        User user = new User();
         String username = dto.getUsername();
         String originPassword = dto.getPassword();
         String confirmPwd = dto.getConfirmpwd();
@@ -105,14 +104,14 @@ public class LoginServiceImpl implements ILoginService {
     }
 
     @Override
-    public XcUserRole buildUserRole(XcUser user) {
-        XcUserRole xcUserRole = new XcUserRole();
+    public UserRole buildUserRole(User user) {
+        UserRole userRole = new UserRole();
         String userRoleId = UUID.randomUUID().toString();
-        xcUserRole.setId(userRoleId);
-        xcUserRole.setUserId(user.getId());
-        xcUserRole.setCreateTime(LocalDateTime.now());
-        xcUserRole.setRoleId("17");
-        return xcUserRole;
+        userRole.setId(userRoleId);
+        userRole.setUserId(user.getId());
+        userRole.setCreateTime(LocalDateTime.now());
+        userRole.setRoleId("17");
+        return userRole;
     }
 
     @Override
@@ -126,7 +125,7 @@ public class LoginServiceImpl implements ILoginService {
         }
         String email = dto.getEmail();
         if (StringUtil.isEmpty(email)) {
-            XuechengPlusException.cast("手机号和邮箱地址不能全为空！");
+            BusinessException.cast("手机号和邮箱地址不能全为空！");
         }
 
         return null;
@@ -149,21 +148,21 @@ public class LoginServiceImpl implements ILoginService {
         passwordAuthService.checkCode(authParamsDto);
 
         //校验用户
-        XcUser user = xcUserMapper.selectOne(new LambdaQueryWrapper<XcUser>().eq(XcUser::getCellphone, cellphone));
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getCellphone, cellphone));
         if (user == null) {
-            XuechengPlusException.cast("此手机号未绑定账号，请先注册！");
+            BusinessException.cast("此手机号未绑定账号，请先注册！");
         }
         String originPassword = dto.getPassword();
         String confirmpwd = dto.getConfirmpwd();
         String password = checkAndEncodePassword(originPassword, confirmpwd);
 
         //更新用户
-        LambdaQueryWrapper<XcUser> updateWrapper = new LambdaQueryWrapper<>();
-        updateWrapper.eq(XcUser::getCellphone, cellphone);
-        XcUser updateUser = new XcUser();
+        LambdaQueryWrapper<User> updateWrapper = new LambdaQueryWrapper<>();
+        updateWrapper.eq(User::getCellphone, cellphone);
+        User updateUser = new User();
         updateUser.setPassword(password);
 
-        int result = xcUserMapper.update(updateUser, updateWrapper);
+        int result = userMapper.update(updateUser, updateWrapper);
 
         return result > 0 ? RestResponse.success() : null;
     }

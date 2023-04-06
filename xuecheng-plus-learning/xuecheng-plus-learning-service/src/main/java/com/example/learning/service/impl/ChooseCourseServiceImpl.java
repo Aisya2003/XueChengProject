@@ -2,7 +2,6 @@ package com.example.learning.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.base.constant.Dictionary;
-import com.example.base.exception.XuechengPlusException;
 import com.example.content.model.po.CoursePublish;
 import com.example.learning.feignclient.CoursePublishClient;
 import com.example.learning.mapper.ChooseCourseMapper;
@@ -13,8 +12,6 @@ import com.example.learning.model.po.ChooseCourse;
 import com.example.learning.model.po.CourseTables;
 import com.example.learning.service.IChooseCourseService;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -28,9 +25,7 @@ import java.util.List;
 @Slf4j
 public class ChooseCourseServiceImpl implements IChooseCourseService {
     private final CoursePublishClient client;
-
     private final ChooseCourseMapper chooseCourseMapper;
-
     private final CourseTablesMapper courseTablesMapper;
     private final IChooseCourseService proxy;
 
@@ -111,7 +106,12 @@ public class ChooseCourseServiceImpl implements IChooseCourseService {
     }
 
     @Transactional
-    public ChooseCourse addChooseCourseFromCoursePublish(String userId, Long courseId, CoursePublish coursePublish, String courseType, String courseChooseStatus, Float coursePrice) {
+    public ChooseCourse addChooseCourseFromCoursePublish(String userId,
+                                                         Long courseId,
+                                                         CoursePublish coursePublish,
+                                                         String courseType,
+                                                         String courseChooseStatus,
+                                                         Float coursePrice) {
         //封装选课信息
         ChooseCourse chooseCourse = new ChooseCourse();
         chooseCourse.setCourseId(courseId);
@@ -190,14 +190,13 @@ public class ChooseCourseServiceImpl implements IChooseCourseService {
         }
 
         //向选课记录表添加记录
-        ChooseCourse chooseCourse = proxy.addChooseCourseFromCoursePublish(
+
+
+        return proxy.addChooseCourseFromCoursePublish(
                 userId,
                 courseId,
                 coursePublish, Dictionary.CHOOSE_COURSE_TYPE_CHARGE.getCode(),
                 Dictionary.CHOOSE_COURSE_STATUS_UNPAID.getCode(), coursePublish.getPrice());
-
-
-        return chooseCourse;
     }
 
     /**

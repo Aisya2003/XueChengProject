@@ -1,15 +1,13 @@
 package com.example.checkcode.service.impl;
 
-import com.example.base.exception.XuechengPlusException;
+import com.example.base.exception.BusinessException;
 import com.example.base.utils.EncryptUtil;
 import com.example.base.utils.PhoneUtil;
-import com.example.base.utils.RandomStringUtil;
 import com.example.base.utils.StringUtil;
 import com.example.checkcode.model.dto.CheckCodeParamsDto;
 import com.example.checkcode.model.dto.CheckCodeResultDto;
 import com.example.checkcode.service.ICheckCodeService;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
-import io.netty.handler.codec.base64.Base64Encoder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -89,7 +87,7 @@ public class CheckCodeServiceImpl implements ICheckCodeService {
         stringRedisTemplate.opsForValue().set(key, code, Duration.ofMinutes(5));
         log.info("短信发送成功,{},{}", phoneNumber, code);
     }
-    
+
 
     /**
      * 生成验证码
@@ -124,8 +122,9 @@ public class CheckCodeServiceImpl implements ICheckCodeService {
             //编码
             picResult = EncryptUtil.encodeBase64(byteArrayOutputStream.toByteArray());
         } catch (Exception e) {
-            XuechengPlusException.cast("生成验证码图片出错");
+            BusinessException.cast("生成验证码图片出错");
         }
+        //组装编码结果
         return "data:image/png;base64," + picResult;
     }
 }

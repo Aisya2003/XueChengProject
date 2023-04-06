@@ -1,11 +1,10 @@
 package com.example.auth.controller;
 
-import com.example.ucenter.model.po.XcUser;
+import com.example.ucenter.model.po.User;
 import com.example.ucenter.service.impl.GitHubAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class GitHubLoginController {
@@ -25,7 +24,7 @@ public class GitHubLoginController {
      */
     @RequestMapping("/githublogin")
     public String githubLogin(String code, String state) throws Exception {
-        XcUser user = gitHubAuthService.getUser(code);
+        User user = gitHubAuthService.getUser(code);
 
         if (user != null) {
             return "redirect:http://www.51xuecheng.cn/sign.html?username=" + user.getUsername()

@@ -3,7 +3,7 @@ package com.example.media.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.base.constant.Dictionary;
-import com.example.base.exception.XuechengPlusException;
+import com.example.base.exception.BusinessException;
 import com.example.base.model.PageParams;
 import com.example.base.model.PageResult;
 import com.example.base.model.RestResponse;
@@ -161,7 +161,7 @@ public class MediaFileServiceImpl implements IMediaFileService {
             try {
                 mediaFilesMapper.insert(mediaFiles);
             } catch (Exception e) {
-                XuechengPlusException.cast("上传数据库失败");
+                BusinessException.cast("上传数据库失败");
             }
             //对avi格式的文件进行处理
             if (mimeType.contains("x-msvideo")) {
@@ -270,7 +270,7 @@ public class MediaFileServiceImpl implements IMediaFileService {
             try {
                 tempMergeFile = File.createTempFile("merge", extension);
             } catch (IOException e) {
-                XuechengPlusException.cast("创建合并临时文件失败");
+                BusinessException.cast("创建合并临时文件失败");
             }
 
             try (
@@ -291,23 +291,23 @@ public class MediaFileServiceImpl implements IMediaFileService {
                         try {
                             randomAccessFileRead.close();
                         } catch (IOException e) {
-                            XuechengPlusException.cast("关闭文件流失败！");
+                            BusinessException.cast("关闭文件流失败！");
                         }
                     }
                 }
 
             } catch (Exception e) {
-                XuechengPlusException.cast("合并文件过程失败！");
+                BusinessException.cast("合并文件过程失败！");
             }
             //校验文件是否正确
             try {
                 FileInputStream fileInputStream = new FileInputStream(tempMergeFile);
                 String mergeMd5 = DigestUtils.md5DigestAsHex(fileInputStream);
                 if (!mergeMd5.equals(fileMd5)) {
-                    XuechengPlusException.cast("文件校验失败！");
+                    BusinessException.cast("文件校验失败！");
                 }
             } catch (IOException e) {
-                XuechengPlusException.cast("文件校验出错！");
+                BusinessException.cast("文件校验出错！");
             }
 
 
@@ -338,11 +338,11 @@ public class MediaFileServiceImpl implements IMediaFileService {
     public RestResponse<String> getFileUrlById(String mediaId) {
         MediaFiles mediaFiles = mediaFilesMapper.selectById(mediaId);
         if (mediaFiles == null) {
-            XuechengPlusException.cast("文件不存在");
+            BusinessException.cast("文件不存在");
         }
         String url = mediaFiles.getUrl();
         if (StringUtils.isEmpty(url)) {
-            XuechengPlusException.cast("文件正在处理中，请稍后！");
+            BusinessException.cast("文件正在处理中，请稍后！");
         }
         return RestResponse.success(url);
     }
@@ -381,7 +381,7 @@ public class MediaFileServiceImpl implements IMediaFileService {
             try {
                 chunkFile = File.createTempFile("chunk", null);
             } catch (IOException e) {
-                XuechengPlusException.cast("创建临时分块文件失败！");
+                BusinessException.cast("创建临时分块文件失败！");
             }
             //获取每一个分块,然后下载
             chunkFile = getFilesByMinio(chunkFile, chunkFilePath, bucketVideoFiles);
@@ -408,7 +408,7 @@ public class MediaFileServiceImpl implements IMediaFileService {
             //将输出流写入文件
             return chunkFile;
         } catch (Exception e) {
-            XuechengPlusException.cast("获取分块异常，请重新上传文件！");
+            BusinessException.cast("获取分块异常，请重新上传文件！");
         }
         return null;
     }
@@ -462,7 +462,7 @@ public class MediaFileServiceImpl implements IMediaFileService {
                     .build();
             minioClient.uploadObject(uploadObjectArgs);
         } catch (Exception e) {
-            XuechengPlusException.cast("上传大文件到minio出错！");
+            BusinessException.cast("上传大文件到minio出错！");
         }
     }
 
@@ -496,7 +496,7 @@ public class MediaFileServiceImpl implements IMediaFileService {
                     .build();
             minioClient.putObject(putObjectArgs);
         } catch (Exception e) {
-            XuechengPlusException.cast("上传Minio失败！");
+            BusinessException.cast("上传Minio失败！");
         }
     }
 

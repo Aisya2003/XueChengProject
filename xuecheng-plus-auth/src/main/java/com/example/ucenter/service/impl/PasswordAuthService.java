@@ -3,10 +3,10 @@ package com.example.ucenter.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.base.utils.StringUtil;
 import com.example.ucenter.feignclient.CheckCodeClient;
-import com.example.ucenter.mapper.XcUserMapper;
+import com.example.ucenter.mapper.UserMapper;
 import com.example.ucenter.model.dto.AuthParamsDto;
-import com.example.ucenter.model.dto.XcUserExt;
-import com.example.ucenter.model.po.XcUser;
+import com.example.ucenter.model.dto.UserExt;
+import com.example.ucenter.model.po.User;
 import com.example.ucenter.service.IAuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -18,31 +18,31 @@ import org.springframework.stereotype.Service;
 @Service(value = "passwordAuth")
 @Slf4j
 public class PasswordAuthService implements IAuthService {
-    private final XcUserMapper xcUserMapper;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final CheckCodeClient checkCodeClient;
 
     @Autowired
-    public PasswordAuthService(XcUserMapper xcUserMapper, PasswordEncoder passwordEncoder, CheckCodeClient checkCodeClient) {
-        this.xcUserMapper = xcUserMapper;
+    public PasswordAuthService(UserMapper userMapper, PasswordEncoder passwordEncoder, CheckCodeClient checkCodeClient) {
+        this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.checkCodeClient = checkCodeClient;
     }
 
     @Override
-    public XcUserExt auth(AuthParamsDto dto) {
+    public UserExt auth(AuthParamsDto dto) {
         //校验验证码
 //        checkCode(dto);
 
 
         String username = dto.getUsername();
-        XcUser xcUser = xcUserMapper.selectOne(new LambdaQueryWrapper<XcUser>().eq(XcUser::getUsername, username));
-        if (xcUser == null) {
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+        if (user == null) {
             throw new UsernameNotFoundException("用户不存在!");
         }
         //获取用户成功
         String passwordFromDto = dto.getPassword();
-        String passwordFromDB = xcUser.getPassword();
+        String passwordFromDB = user.getPassword();
 
         //开始验证
         boolean matches = passwordEncoder.matches(passwordFromDto, passwordFromDB);
@@ -51,10 +51,10 @@ public class PasswordAuthService implements IAuthService {
         }
 
         //封装返回对象
-        XcUserExt xcUserExt = new XcUserExt();
-        BeanUtils.copyProperties(xcUser, xcUserExt);
+        UserExt userExt = new UserExt();
+        BeanUtils.copyProperties(user, userExt);
 
-        return xcUserExt;
+        return userExt;
     }
 
     /**

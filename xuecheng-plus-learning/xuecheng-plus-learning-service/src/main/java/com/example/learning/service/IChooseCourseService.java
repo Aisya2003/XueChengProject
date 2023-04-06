@@ -5,7 +5,6 @@ import com.example.learning.model.dto.ChooseCourseDto;
 import com.example.learning.model.dto.CourseTablesDto;
 import com.example.learning.model.po.ChooseCourse;
 import com.example.learning.model.po.CourseTables;
-import org.springframework.transaction.annotation.Transactional;
 
 public interface IChooseCourseService {
     /**

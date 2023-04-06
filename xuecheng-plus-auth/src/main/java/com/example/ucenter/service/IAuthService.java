@@ -1,8 +1,7 @@
 package com.example.ucenter.service;
 
 import com.example.ucenter.model.dto.AuthParamsDto;
-import com.example.ucenter.model.dto.XcUserExt;
-import com.example.ucenter.model.po.XcUser;
+import com.example.ucenter.model.dto.UserExt;
 
 public interface IAuthService {
     /**
@@ -11,7 +10,7 @@ public interface IAuthService {
      * @param dto 请求参数
      * @return 用户对象的扩展
      */
-    public XcUserExt auth(AuthParamsDto dto);
+    public UserExt auth(AuthParamsDto dto);
 
 
 }

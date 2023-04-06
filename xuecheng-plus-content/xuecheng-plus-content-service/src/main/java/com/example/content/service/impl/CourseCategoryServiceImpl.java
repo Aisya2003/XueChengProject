@@ -35,7 +35,7 @@ public class CourseCategoryServiceImpl implements ICourseCategoryService {
         //定义一个map用来方便寻找父节点，每一个父节点只存在一个在map中
         Map<String, CourseCategoryDto> parentNodes = new HashMap<>();
         //遍历每一个节点
-        courseCategoryDtos.stream().forEach(
+        courseCategoryDtos.forEach(
                 item -> {
                     parentNodes.put(item.getId(), item);
                     //如果传入的id与子节点的parentid相同，则说明这个子节点是直接下属

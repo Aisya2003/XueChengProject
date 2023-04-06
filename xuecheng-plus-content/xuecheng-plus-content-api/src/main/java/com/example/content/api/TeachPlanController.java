@@ -1,13 +1,10 @@
 package com.example.content.api;
 
 import com.example.content.model.dto.BindTeachPlanMediaDto;
-import com.example.content.model.dto.SaveTeachplanDto;
+import com.example.content.model.dto.SaveTeachPlanDto;
 import com.example.content.model.dto.TeachPlanDto;
-import com.example.content.model.po.TeachplanMedia;
 import com.example.content.service.ITeachPlanService;
-import com.example.content.service.impl.TeachPlanServiceImp;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,27 +18,24 @@ import java.util.List;
 @RestController
 @Slf4j
 public class TeachPlanController {
-    private ITeachPlanService teachPlanService;
+    private final ITeachPlanService teachPlanService;
 
     @Autowired
     public TeachPlanController(ITeachPlanService teachPlanService) {
         this.teachPlanService = teachPlanService;
     }
 
-    @ApiOperation("获取课程大纲")
     @GetMapping("/teachplan/{courseId}/tree-nodes")
     public List<TeachPlanDto> getTreeNodes(@PathVariable("courseId") Long courseId) {
         return teachPlanService.selectTeachPlanTree(courseId);
     }
 
-    @ApiOperation("修改或添加教学大纲")
     @PostMapping("/teachplan")
-    public List<TeachPlanDto> saveTeachPlan(@RequestBody SaveTeachplanDto dto) {
+    public List<TeachPlanDto> saveTeachPlan(@RequestBody SaveTeachPlanDto dto) {
         teachPlanService.saveTeachPlan(dto);
         return teachPlanService.selectTeachPlanTree(dto.getCourseId());
     }
 
-    @ApiOperation("课程计划和媒资绑定")
     @PostMapping("/teachplan/association/media")
     public void bindMedia(@RequestBody BindTeachPlanMediaDto dto) {
         teachPlanService.bindMedia(dto);
