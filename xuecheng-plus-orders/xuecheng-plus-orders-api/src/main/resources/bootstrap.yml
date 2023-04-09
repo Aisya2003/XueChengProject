@@ -18,7 +18,7 @@ spring:
         refresh-enabled: true
         extension-configs:
           - data-id: orders-service-${spring.profiles.active}.yaml
-            group: xuecheng-plus-project
+            group: ${nacosGroup}
             refresh: true
         shared-configs:
           - data-id: logging-${spring.profiles.active}.yaml

@@ -1,13 +1,14 @@
 package com.example.learning.api;
 
+import com.example.base.model.PageResult;
 import com.example.learning.model.dto.ChooseCourseDto;
+import com.example.learning.model.dto.CourseTableRequestParams;
 import com.example.learning.model.dto.CourseTablesDto;
+import com.example.learning.model.po.CourseTables;
 import com.example.learning.service.IChooseCourseService;
 import com.example.learning.util.GetUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
@@ -36,10 +37,19 @@ public class CourseTableController {
         if (user == null) return null;
         String userId = user.getId();
 
-        
+
         CourseTablesDto learningQualification = chooseCourseService.getLearningQualification(userId, courseId);
         ChooseCourseDto chooseCourseDto = new ChooseCourseDto();
         chooseCourseDto.setLearnStatus(learningQualification.getLearnStatus());
         return chooseCourseDto;
+    }
+
+    //获取课程表信息
+    @GetMapping("/mycoursetable")
+    public PageResult<CourseTables> getCourseTables(CourseTableRequestParams params) {
+        GetUser.XcUser user = GetUser.getUser();
+        if (Objects.isNull(user)) return null;
+        params.setUserId(user.getId());
+        return chooseCourseService.getCourseTablesList(params);
     }
 }

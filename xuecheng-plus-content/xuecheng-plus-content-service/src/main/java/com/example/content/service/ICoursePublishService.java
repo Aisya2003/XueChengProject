@@ -76,4 +76,12 @@ public interface ICoursePublishService {
      * @return 课程发布表实体
      */
     CoursePublish getCoursePublishByCourseId(Long courseId);
+
+    /**
+     * 获取课程发布信息，以预览的格式返回
+     *
+     * @param courseId 课程id
+     * @return 预览信息
+     */
+    CoursePreviewDto getCoursePublishPreivewInfo(Long courseId);
 }

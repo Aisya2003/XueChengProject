@@ -312,4 +312,23 @@ public class CoursePublishService extends ServiceImpl<CoursePublishPreMapper, Co
         }
         return coursePublishMapper.selectById(courseId);
     }
+
+    @Override
+    public CoursePreviewDto getCoursePublishPreivewInfo(Long courseId) {
+        CoursePublish coursePublish = this.getCoursePublishByCourseId(courseId);
+        if (coursePublish == null) BusinessException.cast("不存在课程！");
+
+        //组装返回对象
+        CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
+        BeanUtils.copyProperties(coursePublish, courseBaseInfoDto);
+        String teachPlanJson = coursePublish.getTeachplan();
+        List<TeachPlanDto> teachPlanDtoList = JSON.parseArray(teachPlanJson, TeachPlanDto.class);
+
+
+        CoursePreviewDto coursePreviewDto = new CoursePreviewDto();
+        coursePreviewDto.setCourseBase(courseBaseInfoDto);
+        coursePreviewDto.setTeachPlans(teachPlanDtoList);
+
+        return coursePreviewDto;
+    }
 }

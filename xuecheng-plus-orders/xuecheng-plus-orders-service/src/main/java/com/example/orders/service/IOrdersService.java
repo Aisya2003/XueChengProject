@@ -80,4 +80,19 @@ public interface IOrdersService {
      * @param response 响应
      */
     void receiveResult(HttpServletRequest request, HttpServletResponse response);
+
+    /**
+     * 更新支付状态
+     *
+     * @param payStatusDto 支付请求参数
+     * @param code         支付渠道
+     */
+    void updatePayStatus(PayStatusDto payStatusDto, String code);
+
+    /**
+     * 更新订单状态
+     *
+     * @param orderId 订单id
+     */
+    void updateOrdersStatus(Long orderId);
 }

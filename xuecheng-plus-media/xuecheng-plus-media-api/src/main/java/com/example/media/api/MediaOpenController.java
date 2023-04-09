@@ -21,7 +21,7 @@ public class MediaOpenController {
         this.mediaFileService = mediaFileService;
     }
 
-    @ApiOperation("预览文件")
+    //预览文件
     @GetMapping("/preview/{mediaId}")
     public RestResponse<String> getPlayUrlByMediaId(@PathVariable("mediaId") String mediaId) {
         RestResponse<String> fileUrlById = mediaFileService.getFileUrlById(mediaId);

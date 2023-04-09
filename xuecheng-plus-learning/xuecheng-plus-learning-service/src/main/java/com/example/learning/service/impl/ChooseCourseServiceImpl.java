@@ -1,17 +1,22 @@
 package com.example.learning.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.base.constant.Dictionary;
+import com.example.base.exception.BusinessException;
+import com.example.base.model.PageResult;
 import com.example.content.model.po.CoursePublish;
 import com.example.learning.feignclient.CoursePublishClient;
 import com.example.learning.mapper.ChooseCourseMapper;
 import com.example.learning.mapper.CourseTablesMapper;
 import com.example.learning.model.dto.ChooseCourseDto;
+import com.example.learning.model.dto.CourseTableRequestParams;
 import com.example.learning.model.dto.CourseTablesDto;
 import com.example.learning.model.po.ChooseCourse;
 import com.example.learning.model.po.CourseTables;
 import com.example.learning.service.IChooseCourseService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -159,6 +164,41 @@ public class ChooseCourseServiceImpl implements IChooseCourseService {
         return courseTablesDto;
     }
 
+    @Override
+    public PageResult<CourseTables> getCourseTablesList(CourseTableRequestParams params) {
+        //封装分页参数
+        Page<CourseTables> page = new Page<>();
+        //设置默认大小
+        long size = params.getSize() <= 0 ? 4 : params.getSize();
+        long from = params.getPage();
+        page.setSize(size);
+        page.setCurrent(from);
+
+        //封装查询条件
+        String userId = params.getUserId();
+        String courseType = params.getCourseType();
+        if (StringUtils.isEmpty(userId)) BusinessException.cast("请先登录");
+
+        LambdaQueryWrapper<CourseTables> queryWrapper = new LambdaQueryWrapper<>();
+        //用户条件
+        queryWrapper.eq(StringUtils.isNotEmpty(userId), CourseTables::getUserId, userId);
+        //课程收费类型条件
+        queryWrapper.eq(StringUtils.isNotEmpty(courseType), CourseTables::getCourseType, courseType);
+        //即将过期和已经过期条件
+        String expiresType = params.getExpiresType();
+        if (expiresType != null && expiresType.equals("1"))
+            //一个星期内失效为即将过期
+            queryWrapper.lt(CourseTables::getValidtimeEnd, LocalDateTime.now().plusWeeks(1));
+        if (expiresType != null && expiresType.equals("2"))
+            queryWrapper.like(CourseTables::getValidtimeEnd, LocalDateTime.now());
+
+        //查询
+        Page<CourseTables> courseTablesPageResult = courseTablesMapper.selectPage(page, queryWrapper);
+
+        //封装返回参数
+        return new PageResult<>(courseTablesPageResult.getRecords(), courseTablesPageResult.getTotal(), from, size);
+    }
+
     /**
      * 查询选课表信息
      *
@@ -242,7 +282,7 @@ public class ChooseCourseServiceImpl implements IChooseCourseService {
      */
     private CourseTables checkCourseTables(Long courseId, String userId) {
         LambdaQueryWrapper<CourseTables> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(CourseTables::getChooseCourseId, courseId);
+        queryWrapper.eq(CourseTables::getCourseId, courseId);
         queryWrapper.eq(CourseTables::getUserId, userId);
         return courseTablesMapper.selectOne(queryWrapper);
     }

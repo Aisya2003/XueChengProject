@@ -11,7 +11,7 @@ import lombok.ToString;
  */
 @Data
 @ToString
-public class MyCourseTableParams {
+public class CourseTableRequestParams {
 
     String userId;
 

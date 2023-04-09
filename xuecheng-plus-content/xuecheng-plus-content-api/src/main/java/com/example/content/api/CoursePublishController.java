@@ -55,4 +55,11 @@ public class CoursePublishController {
     public CoursePublish getCoursePublishInfo(@PathVariable("courseId") Long courseId) {
         return coursePublishService.getCoursePublishByCourseId(courseId);
     }
+
+    //获取课程发布信息
+    @GetMapping("/course/whole/{courseId}")
+    @ResponseBody
+    public CoursePreviewDto getCoursePublishForPreview(@PathVariable("courseId") Long courseId) {
+        return coursePublishService.getCoursePublishPreivewInfo(courseId);
+    }
 }

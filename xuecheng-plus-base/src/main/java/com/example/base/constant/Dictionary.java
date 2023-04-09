@@ -32,9 +32,10 @@ public enum Dictionary {
     ORDER_PAYING_STATUS_PAID("600002", "已支付"),
     ORDER_PAYING_STATUS_CLOSED("600003", "已关闭"),
     ORDER_PAYING_STATUS_REFUNDED("600004", "已退款"),
-    ORDER_PAYING_STATUS_FINISHED("600005", "已完成");
-
-
+    ORDER_PAYING_STATUS_FINISHED("600005", "已完成"),
+    ORDER_TYPE_COURSE("60201", "购买课程"),
+    ORDER_TYPE_LEARNING_MATERIAL("60202", "学习资料");
+    
     private final String code;
     private final String description;
 

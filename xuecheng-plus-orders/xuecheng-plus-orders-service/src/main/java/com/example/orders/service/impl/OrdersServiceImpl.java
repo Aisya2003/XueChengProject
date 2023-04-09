@@ -3,7 +3,6 @@ package com.example.orders.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
-import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
@@ -11,9 +10,10 @@ import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.base.constant.Dictionary;
 import com.example.base.exception.BusinessException;
-import com.example.base.model.RestResponse;
 import com.example.base.utils.IdWorkerUtils;
 import com.example.base.utils.QRCodeUtil;
+import com.example.messagesdk.service.MqMessageService;
+import com.example.orders.config.OrderServiceRabbitMQConfig;
 import com.example.orders.mapper.OrdersGoodsMapper;
 import com.example.orders.mapper.OrdersMapper;
 import com.example.orders.mapper.PayRecordMapper;
@@ -26,24 +26,19 @@ import com.example.orders.model.po.OrdersGoods;
 import com.example.orders.model.po.PayRecord;
 import com.example.orders.service.IOrdersService;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.Size;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +50,7 @@ public class OrdersServiceImpl implements IOrdersService {
     private final OrdersGoodsMapper ordersGoodsMapper;
     private final PayRecordMapper payRecordMapper;
     private final AlipayClient alipayClient;
+    private final MqMessageService mqMessageService;
     @Value("${pay.alipay.ALIPAY_PUBLIC_KEY}")
     private String ALIPAY_PUBLIC_KEY;
     @Value("${pay.alipay.APP_ID}")
@@ -63,12 +59,13 @@ public class OrdersServiceImpl implements IOrdersService {
 
     @Autowired
     @Lazy
-    public OrdersServiceImpl(IOrdersService proxy, OrdersMapper ordersMapper, OrdersGoodsMapper ordersGoodsMapper, PayRecordMapper payRecordMapper, AlipayClient alipayClient) {
+    public OrdersServiceImpl(IOrdersService proxy, OrdersMapper ordersMapper, OrdersGoodsMapper ordersGoodsMapper, PayRecordMapper payRecordMapper, AlipayClient alipayClient, MqMessageService mqMessageService) {
         this.proxy = proxy;
         this.ordersMapper = ordersMapper;
         this.ordersGoodsMapper = ordersGoodsMapper;
         this.payRecordMapper = payRecordMapper;
         this.alipayClient = alipayClient;
+        this.mqMessageService = mqMessageService;
     }
 
     @Override
@@ -179,8 +176,6 @@ public class OrdersServiceImpl implements IOrdersService {
                 valueStr = (i == values.length - 1) ? valueStr + values[i]
                         : valueStr + values[i] + ",";
             }
-            //乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
-            //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "gbk");
             params.put(name, valueStr);
         }
         //验签名
@@ -197,40 +192,41 @@ public class OrdersServiceImpl implements IOrdersService {
 
         if (verify_result) {
             //验证成功
-            String out_trade_no = null;
-            String trade_no = null;
-            String trade_status = null;
-            String appid = null;
-            String total_amount = null;
+            String outTradeNo = null;
+            String tradeNo = null;
+            String tradeStatus = null;
+            String appId = null;
+            String totalAmount = null;
             //商户订单号
-            out_trade_no = this.getRequestParamter(request, "out_trade_no");
+            outTradeNo = this.getRequestParams(request, "out_trade_no");
             //支付宝交易号
-            trade_no = this.getRequestParamter(request, "trade_no");
+            tradeNo = this.getRequestParams(request, "trade_no");
             //交易状态
-            trade_status = this.getRequestParamter(request, "trade_status");
-            //支付宝通过我们的appid
-            appid = this.getRequestParamter(request, "app_id");
+            tradeStatus = this.getRequestParams(request, "trade_status");
+            //支付宝通知的appid
+            appId = this.getRequestParams(request, "app_id");
             //总金额
-            total_amount = this.getRequestParamter(request, "total_amount");
+            totalAmount = this.getRequestParams(request, "total_amount");
 
-            if (trade_status.equals("TRADE_SUCCESS")) {
+            if (tradeStatus.equals("TRADE_SUCCESS")) {
 
                 //封装更新参数
                 PayStatusDto payStatusDto = new PayStatusDto();
-                payStatusDto.setApp_id(appid);
+                payStatusDto.setApp_id(appId);
                 //支付结果
-                payStatusDto.setTrade_status(trade_status);
+                payStatusDto.setTrade_status(tradeStatus);
                 //第三方订单号
-                payStatusDto.setOut_trade_no(out_trade_no);
-                payStatusDto.setTotal_amount(total_amount);
+                payStatusDto.setOut_trade_no(outTradeNo);
+                payStatusDto.setTotal_amount(totalAmount);
                 //支付宝订单号
-                payStatusDto.setTrade_no(trade_no);
+                payStatusDto.setTrade_no(tradeNo);
 
                 //更新数据库
-                updatePayStatus(payStatusDto, Dictionary.PAYING_METHOD_ALIPAY.getCode());
+                proxy.updatePayStatus(payStatusDto, Dictionary.PAYING_METHOD_ALIPAY.getCode());
 
             }
             try {
+                log.info("返回支付宝success信息");
                 response.getWriter().println("success");
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -239,6 +235,7 @@ public class OrdersServiceImpl implements IOrdersService {
         } else {
             //验证失败
             try {
+                log.info("返回支付宝fail信息");
                 response.getWriter().println("fail");
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -264,7 +261,7 @@ public class OrdersServiceImpl implements IOrdersService {
         if (!verifyInfo(payRecordFromDB, payStatusDto)) BusinessException.cast("支付信息异常！");
 
         //检查订单传入参数是否已完成
-        if (Dictionary.PAYING_STATUS_PAID.getCode().equals(payStatusDto.getTrade_status())) {
+        if (Dictionary.ORDER_PAYING_STATUS_PAID.getCode().equals(payStatusDto.getTrade_status())) {
             log.info("请求更新的订单支付状态为已支付");
             return;
         }
@@ -283,7 +280,7 @@ public class OrdersServiceImpl implements IOrdersService {
 
         //更新订单状态
         Long orderId = payRecordFromDB.getOrderId();
-        updateOrdersStatus(orderId);
+        proxy.updateOrdersStatus(orderId);
     }
 
     /**
@@ -303,14 +300,25 @@ public class OrdersServiceImpl implements IOrdersService {
      *
      * @param orderId 订单号
      */
-    private void updateOrdersStatus(Long orderId) {
+    @Transactional
+    public void updateOrdersStatus(Long orderId) {
         Orders orders = ordersMapper.selectById(orderId);
         if (orders == null)
             BusinessException.cast("成功更新支付记录，但是记录所属的订单不存在，订单号" + orders);
         Orders ordersUpdate = new Orders();
-        ordersUpdate.setStatus(Dictionary.PAYING_STATUS_PAID.getCode());
+        ordersUpdate.setStatus(Dictionary.ORDER_PAYING_STATUS_PAID.getCode());
         ordersUpdate.setId(orderId);
         ordersMapper.updateById(ordersUpdate);
+
+        //插入消息表
+        mqMessageService.addMessage(
+                OrderServiceRabbitMQConfig.MESSAGE_TYPE,
+                //选课id
+                orders.getOutBusinessId(),
+                //购买类型
+                orders.getOrderType(),
+                null
+        );
         log.info("更新支付记录成功，更新订单信息成功");
     }
 
@@ -321,7 +329,7 @@ public class OrdersServiceImpl implements IOrdersService {
      * @param param   参数
      * @return 参数的值
      */
-    private String getRequestParamter(HttpServletRequest request, String param) {
+    private String getRequestParams(HttpServletRequest request, String param) {
         return new String(request.getParameter(param).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
     }
 
@@ -387,7 +395,7 @@ public class OrdersServiceImpl implements IOrdersService {
         //设置请求参数
         request.setBizContent(requestParamsJSON);
         //通知地址
-        request.setNotifyUrl("http://655b2525.r11.cpolar.top/api/orders/notify");
+        request.setNotifyUrl("http://6cd18f6b.r6.cpolar.top/api/orders/notify");
 
         //获取返回结果
         String resultForm = null;

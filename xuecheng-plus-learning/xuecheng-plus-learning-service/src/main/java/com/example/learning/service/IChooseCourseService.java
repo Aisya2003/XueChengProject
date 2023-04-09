@@ -1,7 +1,9 @@
 package com.example.learning.service;
 
+import com.example.base.model.PageResult;
 import com.example.content.model.po.CoursePublish;
 import com.example.learning.model.dto.ChooseCourseDto;
+import com.example.learning.model.dto.CourseTableRequestParams;
 import com.example.learning.model.dto.CourseTablesDto;
 import com.example.learning.model.po.ChooseCourse;
 import com.example.learning.model.po.CourseTables;
@@ -63,4 +65,11 @@ public interface IChooseCourseService {
      */
     public CourseTablesDto getLearningQualification(String userId, Long courseId);
 
+    /**
+     * 获取用户课程表的信息
+     *
+     * @param params 请求参数
+     * @return 用户课程表全部信息
+     */
+    PageResult<CourseTables> getCourseTablesList(CourseTableRequestParams params);
 }
