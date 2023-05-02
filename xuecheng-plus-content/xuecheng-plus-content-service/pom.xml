@@ -9,6 +9,10 @@
     </parent>
     <artifactId>xuecheng-plus-content-service</artifactId>
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
         <!--security-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

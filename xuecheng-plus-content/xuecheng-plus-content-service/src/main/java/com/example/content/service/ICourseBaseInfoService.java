@@ -54,4 +54,6 @@ public interface ICourseBaseInfoService {
      * @return CourseBaseInfoDto
      */
     CourseBaseInfoDto updateCourseBaseInfo(Long companyId, EditCourseDto dto);
+
+    PageResult<CourseBase> deleteCourse(Long courseId, Long companyId);
 }

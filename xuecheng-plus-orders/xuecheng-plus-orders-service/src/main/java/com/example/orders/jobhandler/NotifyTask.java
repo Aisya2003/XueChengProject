@@ -66,7 +66,7 @@ public class NotifyTask extends MessageProcessAbstract {
                     @Override
                     public void onSuccess(CorrelationData.Confirm confirm) {
                         if (confirm.isAck()) log.info("消息成功发送到交换机:{}", JSON.toJSONString(mqMessage));
-                        log.error("消息发送失败：{}", JSON.toJSONString(mqMessage));
+                        else log.error("消息发送失败：{}", JSON.toJSONString(mqMessage));
                     }
                 }, new FailureCallback() {
                     @Override

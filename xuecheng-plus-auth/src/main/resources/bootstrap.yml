@@ -22,6 +22,8 @@ spring:
           - data-id: logging-${spring.profiles.active}.yaml
             group: xuecheng-plus-common
             refresh: true
+          - data-id: redis-${spring.profiles.active}.yaml
+            refresh: true
 
   profiles:
     active: dev

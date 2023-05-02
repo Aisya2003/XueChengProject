@@ -46,6 +46,7 @@ public class OrderServiceRabbitMQConfig implements ApplicationContextAware {
     }
 
 
+    //spring创建以后执行这个方法，全局唯一
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         //保证消息的可靠性，当消息从交换机发送到队列时失败会调用此方法

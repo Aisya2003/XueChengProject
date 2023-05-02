@@ -61,6 +61,7 @@ public class CourseBaseInfoController {
      * @return 课程信息Dto
      */
     @GetMapping("/course/{courseId}")
+    @PreAuthorize("hasAuthority('xc_teachmanager_course_add')")
     public CourseBaseInfoDto getCourseBaseInfoDto(@PathVariable("courseId") Long courseId) {
         return baseInfoService.getCourseBaseInfoDto(courseId);
     }
@@ -72,11 +73,20 @@ public class CourseBaseInfoController {
      * @return 页面数据
      */
     @PutMapping("/course")
+    @PreAuthorize("hasAuthority('xc_teachmanager_course_add')")
     public CourseBaseInfoDto modifyCourseBaseInfoDto(@RequestBody EditCourseDto dto) {
 
         Long companyId = Long.valueOf(Objects.requireNonNull(GetUser.getUser()).getCompanyId());
 
         return baseInfoService.updateCourseBaseInfo(companyId, dto);
     }
+
+    @DeleteMapping("/course/{courseId}")
+    @PreAuthorize("hasAuthority('xc_teachmanager_course_del')")
+    public PageResult<CourseBase> deleteCourse(@PathVariable("courseId") Long courseId) {
+        Long companyId = Long.valueOf(Objects.requireNonNull(GetUser.getUser()).getCompanyId());
+        return baseInfoService.deleteCourse(courseId, companyId);
+    }
+
 
 }

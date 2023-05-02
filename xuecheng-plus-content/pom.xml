@@ -13,11 +13,27 @@
     <packaging>pom</packaging>
 
 
-
     <modules>
         <module>xuecheng-plus-content-api</module>
         <module>xuecheng-plus-content-model</module>
         <module>xuecheng-plus-content-service</module>
     </modules>
 
+    <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

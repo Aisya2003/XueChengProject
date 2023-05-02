@@ -89,14 +89,18 @@ public class NotifyListener {
         //参数为全局消息id
         CorrelationData correlationData = new CorrelationData(id.toString());
         //构建消息
-        Message message = MessageBuilder.withBody(JSON.toJSONBytes(mqMessage)).setDeliveryMode(MessageDeliveryMode.PERSISTENT).build();
+        Message message = MessageBuilder
+                .withBody(JSON.toJSONBytes(mqMessage))
+                .setDeliveryMode(MessageDeliveryMode.PERSISTENT)
+                .build();
         //设置消息的回调方法
         correlationData.getFuture().addCallback(
+                //消息没有发送到交换机
                 new SuccessCallback<CorrelationData.Confirm>() {
                     @Override
                     public void onSuccess(CorrelationData.Confirm confirm) {
                         if (confirm.isAck()) log.info("消息成功发送到交换机:{}", JSON.toJSONString(mqMessage));
-                        log.error("消息发送失败：{}", JSON.toJSONString(mqMessage));
+                        else log.error("消息发送失败：{}", JSON.toJSONString(mqMessage));
                     }
                 }, new FailureCallback() {
                     @Override

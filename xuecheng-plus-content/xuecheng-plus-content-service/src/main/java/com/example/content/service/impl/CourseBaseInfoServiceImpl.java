@@ -1,22 +1,21 @@
 package com.example.content.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.base.constant.Dictionary;
+import com.example.base.constant.RedisConstant;
 import com.example.base.exception.BusinessException;
 import com.example.base.model.PageParams;
 import com.example.base.model.PageResult;
-import com.example.content.mapper.CourseBaseMapper;
-import com.example.content.mapper.CourseCategoryMapper;
-import com.example.content.mapper.CourseMarketMapper;
+import com.example.content.mapper.*;
 import com.example.content.model.dto.AddCourseDto;
 import com.example.content.model.dto.CourseBaseInfoDto;
 import com.example.content.model.dto.EditCourseDto;
 import com.example.content.model.dto.QueryCourseParamsDto;
-import com.example.content.model.po.CourseBase;
-import com.example.content.model.po.CourseCategory;
-import com.example.content.model.po.CourseMarket;
+import com.example.content.model.po.*;
 import com.example.content.service.ICourseBaseInfoService;
+import com.example.content.util.CacheUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -25,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @Service
 @Slf4j
@@ -33,17 +34,23 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
     private final CourseMarketMapper courseMarketMapper;
     private final CourseCategoryMapper courseCategoryMapper;
     private final CourseMarketServiceImpl courseMarketService;
+    private final CacheUtil cacheUtil;
+    private final TeachPlanMapper teachPlanMapper;
+    private final TeachPlanMediaMapper teachPlanMediaMapper;
 
     @Autowired
     public CourseBaseInfoServiceImpl(
             CourseBaseMapper courseBaseMapper,
             CourseMarketMapper courseMarketMapper,
             CourseCategoryMapper courseCategoryMapper,
-            CourseMarketServiceImpl courseMarketService) {
+            CourseMarketServiceImpl courseMarketService, CacheUtil cacheUtil, TeachPlanMapper teachPlanMapper, TeachPlanMediaMapper teachPlanMediaMapper) {
         this.courseBaseMapper = courseBaseMapper;
         this.courseMarketMapper = courseMarketMapper;
         this.courseCategoryMapper = courseCategoryMapper;
         this.courseMarketService = courseMarketService;
+        this.cacheUtil = cacheUtil;
+        this.teachPlanMapper = teachPlanMapper;
+        this.teachPlanMediaMapper = teachPlanMediaMapper;
     }
 
     @Override
@@ -161,9 +168,34 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
      */
     @Override
     public CourseBaseInfoDto getCourseBaseInfoDto(Long courseId) {
+        //        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        //        CourseMarket courseMarket = courseMarketMapper.selectById(courseId);
+
         //获取两个基本对象
-        CourseBase courseBase = courseBaseMapper.selectById(courseId);
-        CourseMarket courseMarket = courseMarketMapper.selectById(courseId);
+        CourseBase courseBase = cacheUtil.buildCache(
+                RedisConstant.COURSE_QUERY_PREFIX,
+                courseId,
+                CourseBase.class,
+                new Function<Long, CourseBase>() {
+                    @Override
+                    public CourseBase apply(Long aLong) {
+                        return courseBaseMapper.selectById(aLong);
+                    }
+                }, 10L, TimeUnit.MINUTES);
+
+        CourseMarket courseMarket = cacheUtil.buildCache(
+                RedisConstant.MARKET_QUERY_PREFIX,
+                courseId,
+                CourseMarket.class,
+                new Function<Long, CourseMarket>() {
+                    @Override
+                    public CourseMarket apply(Long aLong) {
+                        return courseMarketMapper.selectById(courseId);
+                    }
+                }, 1L, TimeUnit.DAYS
+        );
+
+
         //填充dto
         CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
         BeanUtils.copyProperties(courseBase, courseBaseInfoDto);
@@ -184,8 +216,33 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
         String st = courseBaseInfoDto.getSt();
 
         //根据categoryMapper查询对应名称
-        CourseCategory categoryMtName = courseCategoryMapper.selectById(mt);
-        CourseCategory categoryStName = courseCategoryMapper.selectById(st);
+
+        //课程分类信息一般不会改变，可以长期存储
+        //        CourseCategory categoryMtName = courseCategoryMapper.selectById(mt);
+        //        CourseCategory categoryStName = courseCategoryMapper.selectById(st);
+        CourseCategory categoryMtName = cacheUtil.buildCache(
+                RedisConstant.CATEGORY_QUERY_PREFIX,
+                mt,
+                CourseCategory.class,
+                new Function<String, CourseCategory>() {
+                    @Override
+                    public CourseCategory apply(String s) {
+                        return courseCategoryMapper.selectById(s);
+                    }
+                }, 365L, TimeUnit.DAYS
+        );
+        CourseCategory categoryStName = cacheUtil.buildCache(
+                RedisConstant.CATEGORY_QUERY_PREFIX,
+                st,
+                CourseCategory.class,
+                new Function<String, CourseCategory>() {
+                    @Override
+                    public CourseCategory apply(String s) {
+                        return courseCategoryMapper.selectById(s);
+                    }
+                }, 365L, TimeUnit.DAYS
+        );
+
         //设置默认值
         courseBaseInfoDto.setMtName("一级分类");
         courseBaseInfoDto.setStName("二级分类");
@@ -211,7 +268,7 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
             throw new BusinessException("课程不存在！");
         }
         //机构id
-        if (courseBase.getCompanyId() != companyId) {
+        if (!courseBase.getCompanyId().equals(companyId)) {
             throw new BusinessException("只能修改本机构的课程！");
         }
         //封装基本信息的数据
@@ -221,6 +278,8 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
 
         //更新课程基本信息表
         int baseResult = courseBaseMapper.updateById(courseBase);
+        //先更新数据库再删除缓存
+        if (baseResult > 0) cacheUtil.removeCache(RedisConstant.COURSE_QUERY_PREFIX + id);
 
         //封装营销信息的数据
         CourseMarket courseMarket = new CourseMarket();
@@ -232,6 +291,34 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
         //查询课程基本信息
 
         return this.getCourseBaseInfoDto(courseBase.getId());
+    }
+
+    @Override
+    @Transactional
+    public PageResult<CourseBase> deleteCourse(Long courseId, Long companyId) {
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        if (!courseBase.getCompanyId().equals(companyId)) BusinessException.cast("只能修改本机构课程");
+
+        //删除基本信息表
+        courseBaseMapper.delete(new LambdaQueryWrapper<CourseBase>().eq(CourseBase::getId, courseId));
+        //删除营销信息表
+        courseMarketMapper.delete(new LambdaQueryWrapper<CourseMarket>().eq(CourseMarket::getId, courseId));
+        //删除教学计划表
+        teachPlanMapper.delete(buildQueryWrapper(courseId, TeachPlan.class));
+        //删除教学计划媒资表
+        teachPlanMediaMapper.delete(buildQueryWrapper(courseId, TeachPlanMedia.class));
+
+        //更新缓存
+        cacheUtil.removeCache(RedisConstant.TEACH_PLAN_QUERY_PREFIX + courseId);
+        cacheUtil.removeCache(RedisConstant.COURSE_QUERY_PREFIX + courseId);
+        cacheUtil.removeCache(RedisConstant.MARKET_QUERY_PREFIX + courseId);
+        return this.queryCourseBaseList(new PageParams(), new QueryCourseParamsDto(), companyId.toString());
+    }
+
+    private <T> QueryWrapper<T> buildQueryWrapper(Long courseId, Class<T> type) {
+        QueryWrapper<T> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("course_id", courseId);
+        return queryWrapper;
     }
 
     /**
@@ -251,6 +338,8 @@ public class CourseBaseInfoServiceImpl implements ICourseBaseInfoService {
 
         //对营销表有则更新，没有则创建
         boolean marketResult = courseMarketService.saveOrUpdate(courseMarket);
+        //删除
+        if (marketResult) cacheUtil.removeCache(RedisConstant.MARKET_QUERY_PREFIX + courseMarket.getId());
         return marketResult ? 1 : 0;
     }
 }

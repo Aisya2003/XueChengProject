@@ -23,6 +23,9 @@ spring:
           - data-id: content-service-${spring.profiles.active}.yaml
             group: xuecheng-plus-project
             refresh: true
+          - data-id: redis-${spring.profiles.active}.yaml
+            group: xuecheng-plus-common
+            refresh: true
   #设置开发环境来匹配nacos配置中
   profiles:
     active: dev
