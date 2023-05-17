@@ -19,6 +19,25 @@
         <option value="$PROJECT_DIR$/xuecheng-plus-checkcode/pom.xml" />
         <option value="$PROJECT_DIR$/xuecheng-plus-learning/pom.xml" />
         <option value="$PROJECT_DIR$/xuecheng-plus-orders/pom.xml" />
+        <option value="$PROJECT_DIR$/parent/pom.xml" />
+        <option value="$PROJECT_DIR$/auth/pom.xml" />
+        <option value="$PROJECT_DIR$/base/pom.xml" />
+        <option value="$PROJECT_DIR$/checkcode/pom.xml" />
+        <option value="$PROJECT_DIR$/content/pom.xml" />
+        <option value="$PROJECT_DIR$/content/content-model/pom.xml" />
+        <option value="$PROJECT_DIR$/content/content-service/pom.xml" />
+        <option value="$PROJECT_DIR$/gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/system/pom.xml" />
+        <option value="$PROJECT_DIR$/message-sdk/pom.xml" />
+        <option value="$PROJECT_DIR$/orders/orders-api/pom.xml" />
+        <option value="$PROJECT_DIR$/orders/orders-model/pom.xml" />
+        <option value="$PROJECT_DIR$/orders/orders-service/pom.xml" />
+        <option value="$PROJECT_DIR$/learning/pom.xml" />
+        <option value="$PROJECT_DIR$/media/pom.xml" />
+        <option value="$PROJECT_DIR$/orders/pom.xml" />
+        <option value="$PROJECT_DIR$/search/pom.xml" />
+        <option value="$PROJECT_DIR$/content/content-api/pom.xml" />
+        <option value="$PROJECT_DIR$/generator/pom.xml" />
       </list>
     </option>
   </component>

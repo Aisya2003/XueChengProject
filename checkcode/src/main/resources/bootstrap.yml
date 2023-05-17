@@ -1,0 +1,32 @@
+nacosAddr: 127.0.0.1:8848
+nacosNameSpace: 1a69680d-6377-4849-bf44-b9e803de94cc
+nacosGroup: xuecheng-plus-project
+spring:
+  application:
+    name: checkcode
+  cloud:
+    nacos:
+      server-addr: ${nacosAddr}
+      discovery:
+        namespace: ${nacosNameSpace}
+        group: ${nacosGroup}
+      config:
+        namespace: ${nacosNameSpace}
+        group: ${nacosGroup}
+        file-extension: yaml
+        refresh-enabled: true
+        shared-configs:
+          - data-id: swagger-${spring.profiles.active}.yaml
+            group: xuecheng-plus-common
+            refresh: true
+          - data-id: logging-${spring.profiles.active}.yaml
+            group: xuecheng-plus-common
+            refresh: true
+          - data-id: redis-${spring.profiles.active}.yaml
+            group: xuecheng-plus-common
+            refresh: true
+          - data-id: mail-${spring.profiles.active}.yaml
+            refresh: true
+            group: common
+  profiles:
+    active: dev
