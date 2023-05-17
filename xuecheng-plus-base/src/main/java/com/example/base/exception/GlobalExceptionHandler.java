@@ -13,13 +13,11 @@ import java.util.List;
 @ControllerAdvice//控制器增强
 @Slf4j
 public class GlobalExceptionHandler {
-    //处理自定义XuechengPlusException，可预知异常
+    //处理自定义Exception，可预知异常
     @ResponseBody//返回为JSON
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)//定义返回的异常Code 500
     public RestErrorResponse handleXuechengPlusException(BusinessException e) {
-
-
         String errMessage = e.getErrMessage();
 
         log.error("捕获异常消息{}", errMessage);
@@ -66,8 +64,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestErrorResponse handleException(Exception e) {
-
-
         log.error("捕获异常消息{}", e.getMessage());
 
         e.printStackTrace();

@@ -23,6 +23,24 @@ spring:
             group: xuecheng-plus-common
             refresh: true
           - data-id: redis-${spring.profiles.active}.yaml
+            group: xuecheng-plus-common
             refresh: true
+          - data-id: mail-${spring.profiles.active}.yaml
+            refresh: true
+            group: common
   profiles:
     active: dev
+  mail:
+    default-encoding: UTF-8
+    host: smtp.qq.com
+    username: 1842929189@qq.com
+    password: wgssnvtgqypndjhd
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: false
+            required: false;
+        debug: true
+    port: 587
+    protocol: smtp

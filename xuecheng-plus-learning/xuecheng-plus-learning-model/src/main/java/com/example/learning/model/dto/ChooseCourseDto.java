@@ -4,12 +4,6 @@ import com.example.learning.model.po.ChooseCourse;
 import lombok.Data;
 import lombok.ToString;
 
-/**
- * @author Mr.M
- * @version 1.0
- * @description TODO
- * @date 2022/10/2 16:10
- */
 @Data
 @ToString
 public class ChooseCourseDto extends ChooseCourse {

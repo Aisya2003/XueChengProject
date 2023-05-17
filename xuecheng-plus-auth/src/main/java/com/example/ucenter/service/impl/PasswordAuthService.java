@@ -32,7 +32,7 @@ public class PasswordAuthService implements IAuthService {
     @Override
     public UserExt auth(AuthParamsDto dto) {
         //校验验证码
-//        checkCode(dto);
+        checkCode(dto);
 
 
         String username = dto.getUsername();

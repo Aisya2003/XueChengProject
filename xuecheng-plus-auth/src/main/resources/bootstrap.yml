@@ -24,6 +24,9 @@ spring:
             refresh: true
           - data-id: redis-${spring.profiles.active}.yaml
             refresh: true
-
+            group: xuecheng-plus-common
+          - data-id: mail-${spring.profiles.active}.yaml
+            refresh: true
+            group: common
   profiles:
     active: dev

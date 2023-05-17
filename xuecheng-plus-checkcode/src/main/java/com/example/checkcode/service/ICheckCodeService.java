@@ -27,4 +27,11 @@ public interface ICheckCodeService {
      * @param phoneNumber 手机号
      */
     public void sendPhoneCode(String phoneNumber);
+
+    /**
+     * 生成邮箱验证码
+     *
+     * @param emailTo 目标邮箱
+     */
+    void sendEmailCode(String emailTo);
 }

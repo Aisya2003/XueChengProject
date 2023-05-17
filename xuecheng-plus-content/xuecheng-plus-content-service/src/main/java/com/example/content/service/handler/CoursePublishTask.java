@@ -1,6 +1,8 @@
 package com.example.content.service.handler;
 
+import com.alibaba.fastjson.JSON;
 import com.example.base.exception.BusinessException;
+import com.example.content.model.po.CoursePublish;
 import com.example.content.service.ICoursePublishService;
 import com.example.messagesdk.model.po.MqMessage;
 import com.example.messagesdk.service.MessageProcessAbstract;
@@ -9,18 +11,23 @@ import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+
+import static com.example.base.constant.RedisConstant.COURSE_QUERY_PREFIX;
 
 @Component
 @Slf4j
 public class CoursePublishTask extends MessageProcessAbstract {
     private final ICoursePublishService coursePublishService;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Autowired
-    public CoursePublishTask(ICoursePublishService coursePublishService) {
+    public CoursePublishTask(ICoursePublishService coursePublishService, StringRedisTemplate stringRedisTemplate) {
         this.coursePublishService = coursePublishService;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
 
@@ -50,7 +57,23 @@ public class CoursePublishTask extends MessageProcessAbstract {
         saveCourseIndex(mqMessage, courseId);
 
         //上传课程信息到Redis
-        return false;
+        saveCourseToRedis(mqMessage, courseId);
+
+        //完成上传任务
+        int completed = getMqMessageService().completed(mqMessage.getId());
+        return completed > 0;
+    }
+
+    /**
+     * 保存发布课程到Redis
+     *
+     * @param mqMessage 消息
+     * @param courseId  课程ID
+     */
+    private void saveCourseToRedis(MqMessage mqMessage, Long courseId) {
+        CoursePublish course = coursePublishService.getCoursePublishByCourseId(courseId);
+        stringRedisTemplate.opsForValue().set(COURSE_QUERY_PREFIX + courseId, JSON.toJSONString(course));
+        getMqMessageService().completedStageThree(mqMessage.getId());
     }
 
     /**

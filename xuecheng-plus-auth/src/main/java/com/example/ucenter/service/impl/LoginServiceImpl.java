@@ -98,7 +98,7 @@ public class LoginServiceImpl implements ILoginService {
                 StringUtil.isEmpty(confirmPwd) ||
                 !originPassword.equals(confirmPwd)
         ) {
-            throw new RuntimeException("密码输入错误！");
+            throw new RuntimeException("密码错误！");
         }
         return passwordEncoder.encode(originPassword);
     }
@@ -116,21 +116,43 @@ public class LoginServiceImpl implements ILoginService {
 
     @Override
     public RestResponse<Boolean> findPassword(FindPasswordDto dto) {
-
-
+        
         String cellphone = dto.getCellphone();
         if (!StringUtil.isEmpty(cellphone)) {
             return findPasswordByPhone(dto, cellphone);
 
         }
+
+
         String email = dto.getEmail();
         if (StringUtil.isEmpty(email)) {
             BusinessException.cast("手机号和邮箱地址不能全为空！");
         }
 
-        return null;
+
+        return findPasswordByEmail(dto, dto.getEmail());
 
 
+    }
+
+    /**
+     * 邮箱找回密码
+     *
+     * @param dto   请求参数
+     * @param email 邮箱地址
+     * @return 找回结果
+     */
+    private RestResponse<Boolean> findPasswordByEmail(FindPasswordDto dto, String email) {
+        checkCodeValidation(dto, email);
+        //校验用户
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getEmail, email));
+        if (user == null) {
+            BusinessException.cast("此邮箱未绑定账号，请先注册！");
+        }
+
+        int result = updatePasswordAfterFindPassword(dto, email);
+
+        return result > 0 ? RestResponse.success() : null;
     }
 
     /**
@@ -141,29 +163,52 @@ public class LoginServiceImpl implements ILoginService {
      * @return 找回结果
      */
     private RestResponse<Boolean> findPasswordByPhone(FindPasswordDto dto, String cellphone) {
-        //校验验证码
-        AuthParamsDto authParamsDto = new AuthParamsDto();
-        authParamsDto.setCheckcodekey("login:" + cellphone);
-        authParamsDto.setCheckcode(dto.getCheckcode());
-        passwordAuthService.checkCode(authParamsDto);
+        checkCodeValidation(dto, cellphone);
 
         //校验用户
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getCellphone, cellphone));
         if (user == null) {
             BusinessException.cast("此手机号未绑定账号，请先注册！");
         }
+
+
+        int result = updatePasswordAfterFindPassword(dto, cellphone);
+
+        return result > 0 ? RestResponse.success() : null;
+    }
+
+    /**
+     * 找回密码后更新密码
+     *
+     * @param dto 请求参数
+     * @param key 更新关键字
+     * @return 更新结果
+     */
+    private int updatePasswordAfterFindPassword(FindPasswordDto dto, String key) {
         String originPassword = dto.getPassword();
         String confirmpwd = dto.getConfirmpwd();
         String password = checkAndEncodePassword(originPassword, confirmpwd);
 
         //更新用户
         LambdaQueryWrapper<User> updateWrapper = new LambdaQueryWrapper<>();
-        updateWrapper.eq(User::getCellphone, cellphone);
+        updateWrapper.eq(User::getCellphone, key).or().eq(User::getEmail, key);
         User updateUser = new User();
         updateUser.setPassword(password);
 
-        int result = userMapper.update(updateUser, updateWrapper);
+        return userMapper.update(updateUser, updateWrapper);
+    }
 
-        return result > 0 ? RestResponse.success() : null;
+    /**
+     * 检查验证码
+     *
+     * @param dto 请求参数
+     * @param key 校验参数
+     */
+    private void checkCodeValidation(FindPasswordDto dto, String key) {
+        //校验验证码
+        AuthParamsDto authParamsDto = new AuthParamsDto();
+        authParamsDto.setCheckcodekey("login:" + key);
+        authParamsDto.setCheckcode(dto.getCheckcode());
+        passwordAuthService.checkCode(authParamsDto);
     }
 }

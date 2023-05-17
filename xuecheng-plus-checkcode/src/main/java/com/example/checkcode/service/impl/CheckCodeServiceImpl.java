@@ -12,26 +12,38 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.time.Duration;
+import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
 public class CheckCodeServiceImpl implements ICheckCodeService {
     private final StringRedisTemplate stringRedisTemplate;
     private final DefaultKaptcha kaptcha;
+    private final JavaMailSender javaMailSender;
+
+    @Value("${spring.mail.username}")
+    private String username;
+
 
     @Autowired
-    public CheckCodeServiceImpl(StringRedisTemplate stringRedisTemplate, DefaultKaptcha kaptcha) {
+    public CheckCodeServiceImpl(StringRedisTemplate stringRedisTemplate, DefaultKaptcha kaptcha, JavaMailSender javaMailSender) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.kaptcha = kaptcha;
+        this.javaMailSender = javaMailSender;
     }
 
     @Override
@@ -73,19 +85,58 @@ public class CheckCodeServiceImpl implements ICheckCodeService {
         if (!match) {
             throw new RuntimeException("手机号码格式错误！");
         }
+        //生成验证码
+        String code = generateRedisNumberCheckCode();
 
+        //存入redis,五分钟有效期
+        String key = "login:" + phoneNumber;
+        stringRedisTemplate.opsForValue().set(key, code, Duration.ofMinutes(5));
+        log.info("短信发送成功,{},{}", phoneNumber, code);
+    }
+
+    /**
+     * 生成验证码
+     *
+     * @return 六位数字
+     */
+    private static String generateRedisNumberCheckCode() {
         //生成验证码
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < 6; i++) {
             int item = RandomUtils.nextInt(0, 9);
             stringBuilder.append(item);
         }
-        String code = stringBuilder.toString();
 
-        //存入redis,五分钟有效期
-        String key = "login:" + phoneNumber;
-        stringRedisTemplate.opsForValue().set(key, code, Duration.ofMinutes(5));
-        log.info("短信发送成功,{},{}", phoneNumber, code);
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public void sendEmailCode(String emailTo) {
+        //验证
+        if (StringUtil.isEmpty(emailTo)) {
+            throw new RuntimeException("手机号码不能为空！");
+        }
+        boolean match = Pattern.matches("^(\\w+([-.][A-Za-z0-9]+)*){3,18}@\\w+([-.][A-Za-z0-9]+)*\\.\\w+([-.][A-Za-z0-9]+)*$", emailTo);
+        if (!match) {
+            BusinessException.cast("邮箱格式错误!");
+        }
+        String checkCode = generateRedisNumberCheckCode();
+
+        //添加缓存
+        String key = "login:" + emailTo;
+        stringRedisTemplate.opsForValue().set(key, checkCode, Duration.ofMinutes(5));
+
+        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setFrom(username);
+        simpleMailMessage.setTo(emailTo);
+        simpleMailMessage.setSubject("密码找回验证码");
+        //邮件内容
+        simpleMailMessage.setText("您的验证码为：" + checkCode + "有效期五分钟");
+        //邮件发送时间
+        simpleMailMessage.setSentDate(new Date());
+        javaMailSender.send(simpleMailMessage);
+
+        log.info("短信发送成功,{},{}", emailTo, checkCode);
     }
 
 

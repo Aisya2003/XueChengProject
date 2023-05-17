@@ -33,4 +33,10 @@ public class CheckCodeController {
     public void sendPhoneCode(@RequestParam("param1") String phoneNumber) {
         checkCodeService.sendPhoneCode(phoneNumber);
     }
+
+    //发送email验证
+    @PostMapping(value = "/email")
+    public void sendEmailCode(@RequestParam("param1") String emailTo) {
+        checkCodeService.sendEmailCode(emailTo);
+    }
 }
